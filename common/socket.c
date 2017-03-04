@@ -4,14 +4,11 @@
 
 #include <stdio.h>
 #include <memory.h>
-#include <netdb.h>
-#include <netinet/in.h>
 #include <unistd.h>
-//#include <time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include "tools/socket.h"
+#include "common/socket.h"
 
 int send_result(char *socket_path,  char* buf, int buf_len)
 {

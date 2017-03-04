@@ -436,8 +436,6 @@ static inline int panda_expend_hook_func(const char *name, panda_expend_func han
             }
             func->internal_function.handler = handler;
             status = SUCCESS;
-        } else {
-           // php_printf("----%s\n-----", name);
         }
     } while (0);
 
@@ -450,22 +448,6 @@ static inline int panda_expend_hook_cls_func(const char *cls_name, const char *n
     zend_function *func;
     int status = FAILURE;
     do {
-
-//        int count = zend_hash_num_elements(CG(class_table));
-//        zend_hash_internal_pointer_reset(CG(class_table));
-//        zval **z_item;
-//
-//        for (int i = 0; i < count; i ++) {
-//            char* key;
-//            ulong idx;
-//            zend_hash_get_current_key(CG(class_table), &key, &idx, 0);
-//            php_printf("%s\n", key);
-//
-//            zend_hash_move_forward(CG(class_table));
-//        }
-//
-
-
         if (zend_hash_find(CG(class_table), cls_name, strlen(cls_name) + 1 , (void **)&cls_ptr) == SUCCESS) {
             zend_class_entry *cls = *cls_ptr;
             if (zend_hash_find(&cls->function_table, name, PANDA_STRLEN(name), (void **)&func) == SUCCESS) {
@@ -474,13 +456,7 @@ static inline int panda_expend_hook_cls_func(const char *cls_name, const char *n
                 }
                 func->internal_function.handler = handler;
                 status = SUCCESS;
-            } else {
-                php_printf("%s:%s\n", cls_name,name);
-                php_printf("2222222\n");
             }
-        } else {
-            php_printf("%s\n", cls_name);
-            php_printf("1111111\n");
         }
     } while (0);
     return status;

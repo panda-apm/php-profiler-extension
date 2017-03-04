@@ -43,7 +43,7 @@
 #include "panda_compile.h"
 #include "panda_expend.h"
 #include "panda_resource.h"
-#include "libs/socket.h"
+#include "common/socket.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(panda)
 /* True global resources - no need for thread safety here */

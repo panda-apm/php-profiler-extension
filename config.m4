@@ -103,7 +103,7 @@ if test "$PHP_PANDA" != "no"; then
   panda_expend.c panda_compile.c panda_resource.c expends/mysql/mysql.c \
   expends/mysqli/mysqli.c expends/pdo/pdo.c expends/memcached/memcached.c \
   expends/memcache/memcache.c expends/redis/redis.c expends/curl/curl.c \
-  expends/standard/standard.c libs/socket.c, $ext_shared)
+  expends/standard/standard.c common/socket.c, $ext_shared)
    
   PHP_ADD_BUILD_DIR([$ext_builddir/expends])
 fi
