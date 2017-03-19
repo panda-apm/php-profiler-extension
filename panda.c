@@ -225,17 +225,19 @@ PHP_RSHUTDOWN_FUNCTION(panda)
         panda_compile_destroy_globals();
     }
 
-    long options = 0;
+    long options = PHP_JSON_FORCE_OBJECT;
     smart_str buf_json = {0};
     php_json_encode(&buf_json, data, options TSRMLS_CC);
     smart_str_0(&buf_json);
     PANDA_LOG(buf_json.c);
 
-    if (VCWD_ACCESS(PANDA_G(config_unix_socket), F_OK) == 0) {
-        if (send_result(PANDA_G(config_unix_socket), buf_json.c, buf_json.len)) {
-            PANDA_LOG("send ok!");
-        } else {
-            PANDA_LOG("send error!");
+    if (panda_request_is_cli_mode(TSRMLS_C) == PANDA_FALSE) {
+        if (VCWD_ACCESS(PANDA_G(config_unix_socket), F_OK) == 0) {
+            if (send_result(PANDA_G(config_unix_socket), buf_json.c, buf_json.len)) {
+                PANDA_LOG("send ok!");
+            } else {
+                PANDA_LOG("send error!");
+            }
         }
     }
 
