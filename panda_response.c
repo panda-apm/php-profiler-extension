@@ -2,6 +2,7 @@
 #include "config.h"
 #endif
 
+#include <time.h>
 #include "php.h"
 #include "main/SAPI.h"
 #include "php_panda.h"
@@ -19,6 +20,7 @@ int panda_response_compose_node(TSRMLS_D)
         }
         add_assoc_long(zv, PANDA_NODE_RESPONSE_HTTP_STATUS, (long)SG(sapi_headers.http_response_code));
         add_assoc_string(zv, PANDA_NODE_RESPONSE_HTTP_MIMETYPE, mimetype, PANDA_TRUE);
+        add_assoc_long(zv, PANDA_NODE_RESPONSE_RESPONSE_TIME, time(NULL));
     }
     return PANDA_TRUE;
 }
