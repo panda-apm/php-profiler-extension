@@ -48,7 +48,7 @@ int panda_request_compose_node(TSRMLS_D)
 
         if (cli_mode == PANDA_FALSE) {
             zval *server_addr, *server_port, *redirect_status, *request_method, *user_agent, *request_uri;
-            zval *client_addr, *server_name;
+            zval *client_addr, *server_name, *document_uri;
             int xml_request = panda_request_is_xml_http_request(TSRMLS_C);
             server_addr = PANDA_REQUEST_GET_PARAM(PANDA_REQUEST_VARS_SERVER, PANDA_REQUEST_VARS_SERVER_SERVER_ADDR);
             server_port = PANDA_REQUEST_GET_PARAM(PANDA_REQUEST_VARS_SERVER, PANDA_REQUEST_VARS_SERVER_SERVER_PORT);
@@ -57,8 +57,8 @@ int panda_request_compose_node(TSRMLS_D)
             user_agent = PANDA_REQUEST_GET_PARAM(PANDA_REQUEST_VARS_SERVER, PANDA_REQUEST_VARS_SERVER_HTTP_USER_AGENT);
             request_uri = PANDA_REQUEST_GET_PARAM(PANDA_REQUEST_VARS_SERVER, PANDA_REQUEST_VARS_SERVER_REQUEST_URI);
             server_name = PANDA_REQUEST_GET_PARAM(PANDA_REQUEST_VARS_SERVER, PANDA_REQUEST_VARS_SERVER_SERVER_NAME);
+            document_uri = PANDA_REQUEST_GET_PARAM(PANDA_REQUEST_VARS_SERVER, PANDA_REQUEST_VARS_SERVER_DOCUMENT_URI);
             client_addr = panda_request_get_real_client_addr(TSRMLS_C);
-
 
             convert_to_long(server_port);
             convert_to_long(redirect_status);
@@ -68,6 +68,8 @@ int panda_request_compose_node(TSRMLS_D)
             add_assoc_string(server, PANDA_NODE_REQUEST_SERVER_HTTP_USER_AGENT, Z_STRVAL_P(user_agent), PANDA_TRUE);
             add_assoc_string(server, PANDA_NODE_REQUEST_SERVER_REQUEST_URI, Z_STRVAL_P(request_uri), PANDA_TRUE);
             add_assoc_string(server, PANDA_NODE_REQUEST_SERVER_SERVER_NAME, Z_STRVAL_P(server_name), PANDA_TRUE);
+            add_assoc_string(server, PANDA_NODE_REQUEST_SERVER_DOCUMENT_URI, Z_STRVAL_P(document_uri), PANDA_TRUE);
+
             add_assoc_long(server, PANDA_NODE_REQUEST_SERVER_SERVER_PORT, Z_LVAL_P(server_port));
             add_assoc_long(server, PANDA_NODE_REQUEST_SERVER_REDIRECT_STATUS, Z_LVAL_P(redirect_status));
             add_assoc_long(server, PANDA_NODE_REQUEST_SERVER_IS_XML_REQUEST, (long)xml_request);
