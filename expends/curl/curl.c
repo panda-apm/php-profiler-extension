@@ -32,17 +32,17 @@ PANDA_FUNCTION(curl_init)
     zval *url_val;
     int params_count = panda_stack_get_execute_paramters_count(execute_data TSRMLS_CC);
     int instance_id = Z_OBJ_HANDLE_P(return_value);
-    panda_url_entry_t *url_entry = emalloc(sizeof(panda_url_entry_t));
-    url_entry->url = NULL;
-    url_entry->url_len = 0;
+    panda_url_entity_t *url_entity = emalloc(sizeof(panda_url_entity_t));
+    url_entity->url = NULL;
+    url_entity->url_len = 0;
 
     if (params_count > 0) {
         url_val = panda_stack_get_execute_param(execute_data, 0 TSRMLS_CC);
-        url_entry->url = Z_STRVAL_P(url_val);
-        url_entry->url_len = Z_STRLEN_P(url_val);
+        url_entity->url = Z_STRVAL_P(url_val);
+        url_entity->url_len = Z_STRLEN_P(url_val);
     }
 
-    panda_resource_set_url_entry_with_instance_id(instance_id, url_entry TSRMLS_CC);
+    panda_resource_set_url_entity_with_instance_id(instance_id, url_entity TSRMLS_CC);
 
     efree(execute_name);
     PANDA_ARRAY_DESTROY(expend_data);
@@ -66,7 +66,7 @@ PANDA_FUNCTION(curl_setopt)
 
     int instance_id;
     zval *instance_val, *key_val, *val_val;
-    panda_url_entry_t *url_entry;
+    panda_url_entity_t *url_entity;
 
     instance_val = panda_stack_get_execute_param(execute_data, 0 TSRMLS_CC);
     key_val = panda_stack_get_execute_param(execute_data, 1 TSRMLS_CC);
@@ -74,9 +74,9 @@ PANDA_FUNCTION(curl_setopt)
 
     instance_id = Z_OBJ_HANDLE_P(instance_val);
     if (Z_LVAL_P(key_val) == CURLOPT_URL) {
-        if (panda_resource_get_url_entry_with_instance_id(instance_id, &url_entry TSRMLS_CC) == SUCCESS) {
-            url_entry->url = Z_STRVAL_P(val_val);
-            url_entry->url_len = Z_STRLEN_P(val_val);
+        if (panda_resource_get_url_entity_with_instance_id(instance_id, &url_entity TSRMLS_CC) == SUCCESS) {
+            url_entity->url = Z_STRVAL_P(val_val);
+            url_entity->url_len = Z_STRLEN_P(val_val);
         }
     }
 
@@ -102,15 +102,15 @@ PANDA_FUNCTION(curl_setopt_array)
     int instance_id;
     zval *instance_val, *items_val;
     zval **url_item;
-    panda_url_entry_t *curl_entry;
+    panda_url_entity_t *curl_entity;
     instance_val = panda_stack_get_execute_param(execute_data, 0 TSRMLS_CC);
     items_val = panda_stack_get_execute_param(execute_data, 1 TSRMLS_CC);
     instance_id = Z_OBJ_HANDLE_P(instance_val);
 
     if (zend_hash_index_find(Z_ARRVAL_P(items_val), CURLOPT_URL, (void **)&url_item) == SUCCESS) {
-        if (panda_resource_get_url_entry_with_instance_id(instance_id, &curl_entry TSRMLS_CC) == SUCCESS) {
-            curl_entry->url = Z_STRVAL_PP(url_item);
-            curl_entry->url_len = Z_STRLEN_PP(url_item);
+        if (panda_resource_get_url_entity_with_instance_id(instance_id, &curl_entity TSRMLS_CC) == SUCCESS) {
+            curl_entity->url = Z_STRVAL_PP(url_item);
+            curl_entity->url_len = Z_STRLEN_PP(url_item);
         }
     }
 
@@ -135,14 +135,14 @@ PANDA_FUNCTION(curl_exec)
 
     int instance_id;
     zval *instance_val;
-    panda_url_entry_t *url_entry;
+    panda_url_entity_t *url_entity;
 
     int params_count = panda_stack_get_execute_paramters_count(execute_data TSRMLS_CC);
     if (params_count > 0) {
         instance_val = panda_stack_get_execute_param(execute_data, 0 TSRMLS_CC);
         instance_id = Z_OBJ_HANDLE_P(instance_val);
-        if (panda_resource_get_url_entry_with_instance_id(instance_id, &url_entry TSRMLS_CC) == SUCCESS) {
-            add_assoc_stringl(expend_data, PANDA_NODE_STACK_MAPS_REFRENCES_URL, url_entry->url, url_entry->url_len, PANDA_TRUE);
+        if (panda_resource_get_url_entity_with_instance_id(instance_id, &url_entity TSRMLS_CC) == SUCCESS) {
+            add_assoc_stringl(expend_data, PANDA_NODE_STACK_MAPS_REFRENCES_URL, url_entity->url, url_entity->url_len, PANDA_TRUE);
         }
     }
 
@@ -165,14 +165,14 @@ PANDA_FUNCTION(curl_close)
 
     int instance_id;
     zval *instance_val;
-    panda_url_entry_t *url_entry;
+    panda_url_entity_t *url_entity;
 
     int params_count = panda_stack_get_execute_paramters_count(execute_data TSRMLS_CC);
     if (params_count > 0) {
         instance_val = panda_stack_get_execute_param(execute_data, 0 TSRMLS_CC);
         instance_id = Z_OBJ_HANDLE_P(instance_val);
-        if (panda_resource_get_url_entry_with_instance_id(instance_id, &url_entry TSRMLS_CC) == SUCCESS) {
-            efree(url_entry);
+        if (panda_resource_get_url_entity_with_instance_id(instance_id, &url_entity TSRMLS_CC) == SUCCESS) {
+            efree(url_entity);
         }
     }
 
@@ -351,13 +351,13 @@ PANDA_FUNCTION(curl_multi_exec)
 
         for (i = 0; i < count; i ++) {
             int child_id;
-            panda_url_entry_t *url_entry;
+            panda_url_entity_t *url_entity;
             zend_hash_get_current_data(Z_ARRVAL_P(child_instances), (void**) &z_item);
             zend_hash_move_forward(Z_ARRVAL_P(child_instances));
             if (Z_TYPE_PP(z_item) == IS_LONG) {
                 child_id = Z_LVAL_PP(z_item);
-                if (panda_resource_get_url_entry_with_instance_id(child_id, &url_entry TSRMLS_CC) == SUCCESS) {
-                    add_next_index_stringl(urls, url_entry->url, url_entry->url_len, PANDA_TRUE);
+                if (panda_resource_get_url_entity_with_instance_id(child_id, &url_entity TSRMLS_CC) == SUCCESS) {
+                    add_next_index_stringl(urls, url_entity->url, url_entity->url_len, PANDA_TRUE);
                 }
             }
         }

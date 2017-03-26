@@ -30,8 +30,8 @@ int panda_resource_set_prepare_sql_with_stmt_id(ulong stmt_id, char *prepare_sql
 int panda_resource_get_prepare_sql_with_stmt_id(ulong stmt_id, char **prepare_sql TSRMLS_DC);
 int panda_resource_set_instance_id_with_stmt_id(ulong stmt_id, int instance_id TSRMLS_DC);
 int panda_resource_get_instance_id_with_stmt_id(ulong stmt_id, int *instance_id TSRMLS_DC);
-int panda_resource_set_url_entry_with_instance_id(int instance_id, panda_url_entry_t *url_entry TSRMLS_DC);
-int panda_resource_get_url_entry_with_instance_id(int instance_id, panda_url_entry_t  **url_entry TSRMLS_DC);
+int panda_resource_set_url_entity_with_instance_id(int instance_id, panda_url_entity_t *url_entity TSRMLS_DC);
+int panda_resource_get_url_entity_with_instance_id(int instance_id, panda_url_entity_t  **url_entity TSRMLS_DC);
 int panda_resource_set_child_instances_with_instance_id(int instance_id, zval *child_instances TSRMLS_DC);
 int panda_resource_get_child_instances_with_instance_id(int instance_id, zval **child_instances TSRMLS_DC);
 #endif

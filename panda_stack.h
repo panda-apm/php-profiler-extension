@@ -4,9 +4,9 @@
 
 //#define PANDA_STACK_CLS_NAME_SPEA_POINTER   "->"
 #define PANDA_STACK_MAIN_FUNCTION "__main__"
-#define PANDA_STACK_ENTRY_DEFAULT_LEVEL  1
-#define PANDA_STACK_ENTRY_DEFAULT_PARENT_ID 0
-#define PANDA_STACK_ENTRY_DEFAULT_CALL_TIME 1
+#define PANDA_STACK_ENTITY_DEFAULT_LEVEL  1
+#define PANDA_STACK_ENTITY_DEFAULT_PARENT_ID 0
+#define PANDA_STACK_ENTITY_DEFAULT_CALL_TIME 1
 #define PANDA_STACK_CLS_NAME_SPRA_QUOTATION "::"
 
 #define PANDA_NODE_STACK "stack"
@@ -49,52 +49,52 @@
 #define PANDA_NODE_STACK_MAPS_REFRENCES_FILENAME "filename"
 
 
-#define PANDA_STACK_GET_ENTRY_CPU_TIME(entry) panda_stack_get_us_interval(&(entry->start_ru.ru_utime), &(entry->end_ru.ru_utime) TSRMLS_CC) + \
-        panda_stack_get_us_interval(&(entry->start_ru.ru_stime), &(entry->end_ru.ru_stime) TSRMLS_CC)
-#define PANDA_STACK_GET_ENTRY_WALL_TIME(entry) entry->end_us - entry->start_us
-#define PANDA_STACK_GET_ENTRY_MEMORY_USAGE(entry) entry->end_mu - entry->start_mu
-#define PANDA_STACK_GET_ENTRY_MEMORY_PEAK_USAGE(entry) entry->end_pmu - entry->start_pmu
-#define PANDA_STACK_INC_ENTRY_ITEM_NUM(zval, name, num) panda_stcak_inc_entry_item_num(zval, name, num TSRMLS_CC)
+#define PANDA_STACK_GET_ENTITY_CPU_TIME(entity) panda_stack_get_us_interval(&(entity->start_ru.ru_utime), &(entity->end_ru.ru_utime) TSRMLS_CC) + \
+        panda_stack_get_us_interval(&(entity->start_ru.ru_stime), &(entity->end_ru.ru_stime) TSRMLS_CC)
+#define PANDA_STACK_GET_ENTITY_WALL_TIME(entity) entity->end_us - entity->start_us
+#define PANDA_STACK_GET_ENTITY_MEMORY_USAGE(entity) entity->end_mu - entity->start_mu
+#define PANDA_STACK_GET_ENTITY_MEMORY_PEAK_USAGE(entity) entity->end_pmu - entity->start_pmu
+#define PANDA_STACK_INC_ENTITY_ITEM_NUM(zval, name, num) panda_stcak_inc_entity_item_num(zval, name, num TSRMLS_CC)
 
-#define PANDA_STACK_ALLOC_ENTRY() malloc(sizeof(panda_stack_entry_t))
-#define PANDA_STACK_DESTROY_ENTRY(entry) free(entry);
+#define PANDA_STACK_ALLOC_ENTITY() malloc(sizeof(panda_stack_entity_t))
+#define PANDA_STACK_DESTROY_ENTITY(entity) free(entity);
 
-#define PANDA_STACK_BEGIN_PROFILING(entries, symbol, execute_data)               \
+#define PANDA_STACK_BEGIN_PROFILING(entities, symbol, execute_data)               \
     do {                                                                         \
         int must_new = PANDA_FALSE;                                              \
-        panda_stack_entry_t *entry = PANDA_STACK_ALLOC_ENTRY();                  \
-        entry->name = symbol;                                                    \
-        entry->name_len = PANDA_STRLEN(symbol);                                  \
-        entry->start_us = panda_stack_cycle_timer(TSRMLS_C);                     \
-        entry->hash_code = zend_inline_hash_func(entry->name, entry->name_len);  \
-        entry->start_mu = zend_memory_usage(0 TSRMLS_CC);                        \
-        entry->start_pmu = zend_memory_peak_usage(0 TSRMLS_CC);                  \
-        getrusage(RUSAGE_SELF, &entry->start_ru);                                \
-        entry->prev_entry = (*(entries));                                        \
-        if (*entries == NULL) {                                                  \
-            entry->level = PANDA_STACK_ENTRY_DEFAULT_LEVEL;                      \
-            entry->parent_id = PANDA_STACK_ENTRY_DEFAULT_PARENT_ID;              \
+        panda_stack_entity_t *entity = PANDA_STACK_ALLOC_ENTITY();                  \
+        entity->name = symbol;                                                    \
+        entity->name_len = PANDA_STRLEN(symbol);                                  \
+        entity->start_us = panda_stack_cycle_timer(TSRMLS_C);                     \
+        entity->hash_code = zend_inline_hash_func(entity->name, entity->name_len);  \
+        entity->start_mu = zend_memory_usage(0 TSRMLS_CC);                        \
+        entity->start_pmu = zend_memory_peak_usage(0 TSRMLS_CC);                  \
+        getrusage(RUSAGE_SELF, &entity->start_ru);                                \
+        entity->prev_entity = (*(entities));                                        \
+        if (*entities == NULL) {                                                  \
+            entity->level = PANDA_STACK_ENTITY_DEFAULT_LEVEL;                      \
+            entity->parent_id = PANDA_STACK_ENTITY_DEFAULT_PARENT_ID;              \
         } else {                                                                 \
-            entry->level = (*(entries))->level + 1;                              \
-            entry->parent_id = (*(entries))->id;                                 \
+            entity->level = (*(entities))->level + 1;                              \
+            entity->parent_id = (*(entities))->id;                                 \
         }                                                                        \
         if (execute_data == NULL) {                                              \
             must_new = PANDA_TRUE;                                               \
         }                                                                        \
-        entry->id = panda_stack_get_entry_id(entry, must_new TSRMLS_CC);         \
-        (*(entries)) = (entry);                                                  \
+        entity->id = panda_stack_get_entity_id(entity, must_new TSRMLS_CC);         \
+        (*(entities)) = (entity);                                                  \
     } while (0)                                                                  \
 
-#define PANDA_STACK_END_PROFILING(entries, execute_data, expend_data)               \
+#define PANDA_STACK_END_PROFILING(entities, execute_data, expend_data)               \
     do {                                                                            \
-        panda_stack_entry_t *entry = (*entries);                                    \
-        entry->end_mu = zend_memory_usage(0 TSRMLS_CC);                             \
-        entry->end_pmu = zend_memory_usage(0 TSRMLS_CC);                            \
-        entry->end_us = panda_stack_cycle_timer(TSRMLS_C);                          \
-        getrusage(RUSAGE_SELF, &entry->end_ru);                                     \
-        panda_stack_extract_entry_data(entry, execute_data, expend_data TSRMLS_CC); \
-        (*(entries)) = (*(entries))->prev_entry;                                    \
-        panda_stack_free_entry(entry TSRMLS_CC);                                    \
+        panda_stack_entity_t *entity = (*entities);                                    \
+        entity->end_mu = zend_memory_usage(0 TSRMLS_CC);                             \
+        entity->end_pmu = zend_memory_peak_usage(0 TSRMLS_CC);                            \
+        entity->end_us = panda_stack_cycle_timer(TSRMLS_C);                          \
+        getrusage(RUSAGE_SELF, &entity->end_ru);                                     \
+        panda_stack_extract_entity_data(entity, execute_data, expend_data TSRMLS_CC); \
+        (*(entities)) = (*(entities))->prev_entity;                                    \
+        panda_stack_free_entity(entity TSRMLS_CC);                                    \
     } while (0)                                                                     \
 
 #if PHP_VERSION_ID < 50500
@@ -113,15 +113,15 @@ int panda_stack_destroy_hooks(TSRMLS_D);
 int panda_stack_begin_profiling(TSRMLS_D);
 int panda_stack_end_profiling(TSRMLS_D);
 uint64 panda_stack_cycle_timer(TSRMLS_D);
-int panda_stack_free_entry(panda_stack_entry_t *entry TSRMLS_DC);
+int panda_stack_free_entity(panda_stack_entity_t *entity TSRMLS_DC);
 void **panda_stack_get_execute_parameters(zend_execute_data *execute_data TSRMLS_DC);
 zval *panda_stack_get_execute_param(zend_execute_data *execute_data, int n TSRMLS_DC);
 int panda_stack_get_execute_paramters_count(zend_execute_data *execute_data TSRMLS_DC);
-int panda_stack_extract_entry_data(panda_stack_entry_t *entry, zend_execute_data *execute_data, zval *expend_data TSRMLS_DC);
-int panda_stack_get_entry_id(panda_stack_entry_t *entry, int must_new TSRMLS_DC);
+int panda_stack_extract_entity_data(panda_stack_entity_t *entity, zend_execute_data *execute_data, zval *expend_data TSRMLS_DC);
+int panda_stack_get_entity_id(panda_stack_entity_t *entity, int must_new TSRMLS_DC);
 ulong panda_stack_get_resource_hash(const char *host, int port TSRMLS_DC);
 char *panda_stack_get_function_name(zend_execute_data *execute_data TSRMLS_DC);
-static inline int panda_stcak_inc_entry_item_num(zval *zv, char* name, int64 num TSRMLS_DC);
+static inline int panda_stcak_inc_entity_item_num(zval *zv, char* name, int64 num TSRMLS_DC);
 static inline long panda_stack_get_us_interval(struct timeval *start, struct timeval *end TSRMLS_DC);
 static int panda_array_stack_compare(const void *a, const void *b TSRMLS_DC);
 #endif

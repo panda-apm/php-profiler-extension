@@ -46,10 +46,10 @@ int panda_stack_init_globals(TSRMLS_D)
     PANDA_ARRAY_INIT(PANDA_G(node_stack));
     PANDA_ARRAY_INIT(PANDA_G(stack_maps));
     PANDA_G(stack_entries) = NULL;
-    PANDA_G(stack_prev_entry) = NULL;
+    PANDA_G(stack_prev_entity) = NULL;
     PANDA_G(stack_count) = 0;
     PANDA_G(stack_max_level) = 0;
-    PANDA_G(stack_entry_id) = -1;
+    PANDA_G(stack_entity_id) = -1;
 
     return SUCCESS;
 }
@@ -70,7 +70,7 @@ int panda_stack_begin_profiling(TSRMLS_D)
 int panda_stack_end_profiling(TSRMLS_D)
 {
     //Program to join the die directive. so need while
-    //while (PANDA_G(stack_prev_entry)) {
+    //while (PANDA_G(stack_prev_entity)) {
         PANDA_STACK_END_PROFILING(&PANDA_G(stack_entries), NULL, NULL);
     //}
     return SUCCESS;
@@ -112,20 +112,20 @@ int panda_stack_destroy_hooks(TSRMLS_C)
 }
 
 
-int panda_stack_extract_entry_data(panda_stack_entry_t *entry, zend_execute_data *execute_data, zval *expend_data TSRMLS_DC)
+int panda_stack_extract_entity_data(panda_stack_entity_t *entity, zend_execute_data *execute_data, zval *expend_data TSRMLS_DC)
 {
     zval *zv = PANDA_G(stack_maps);
     zval **stack;
 
     int status = FAILURE;
-    int64 wall_time_us = PANDA_STACK_GET_ENTRY_WALL_TIME(entry);
-    int64 cpu_time_us = PANDA_STACK_GET_ENTRY_CPU_TIME(entry);
-    int64 memory_usage = PANDA_STACK_GET_ENTRY_MEMORY_USAGE(entry);
-    int64 memory_peak_usage = PANDA_STACK_GET_ENTRY_MEMORY_PEAK_USAGE(entry);
+    int64 wall_time_us = PANDA_STACK_GET_ENTITY_WALL_TIME(entity);
+    int64 cpu_time_us = PANDA_STACK_GET_ENTITY_CPU_TIME(entity);
+    int64 memory_usage = PANDA_STACK_GET_ENTITY_MEMORY_USAGE(entity);
+    int64 memory_peak_usage = PANDA_STACK_GET_ENTITY_MEMORY_PEAK_USAGE(entity);
 
     PANDA_G(stack_count)++;
-    if (entry->level > PANDA_G(stack_max_level)) {
-        PANDA_G(stack_max_level) = entry->level;
+    if (entity->level > PANDA_G(stack_max_level)) {
+        PANDA_G(stack_max_level) = entity->level;
     }
 
     do {
@@ -133,7 +133,7 @@ int panda_stack_extract_entry_data(panda_stack_entry_t *entry, zend_execute_data
            //break;
         }
 
-        if (entry->level > PANDA_G(config_stack_max_levels)) {
+        if (entity->level > PANDA_G(config_stack_max_levels)) {
             break;
         }
 
@@ -141,33 +141,33 @@ int panda_stack_extract_entry_data(panda_stack_entry_t *entry, zend_execute_data
             break;
         }
 
-        if (zend_hash_index_find(Z_ARRVAL_P(zv), (ulong)entry->id, (void **)&stack) == SUCCESS) {
+        if (zend_hash_index_find(Z_ARRVAL_P(zv), (ulong)entity->id, (void **)&stack) == SUCCESS) {
             PANDA_ASSOC_ARRAY_INC_NUM(*stack, PANDA_NODE_STACK_MAPS_CALL_TIME, 1);
             PANDA_ASSOC_ARRAY_INC_NUM(*stack, PANDA_NODE_STACK_MAPS_WALL_TIME_US, wall_time_us);
             PANDA_ASSOC_ARRAY_INC_NUM(*stack, PANDA_NODE_STACK_MAPS_CPU_TIME_US, cpu_time_us);
             PANDA_ASSOC_ARRAY_INC_NUM(*stack, PANDA_NODE_STACK_MAPS_MEMORY_USAGE, memory_usage);
             PANDA_ASSOC_ARRAY_INC_NUM(*stack, PANDA_NODE_STACK_MAPS_MEMORY_PEAK_USAGE, memory_peak_usage);
-            add_assoc_long(*stack, PANDA_NODE_STACK_MAPS_END_TIME_MS, entry->end_us / 1000);
+            add_assoc_long(*stack, PANDA_NODE_STACK_MAPS_END_TIME_MS, entity->end_us / 1000);
         } else {
             zval *new_stack;
             PANDA_ARRAY_INIT(new_stack);
-            add_assoc_string(new_stack, PANDA_NODE_STACK_MAPS_NAME, entry->name, 1);
-            add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_ID, entry->id);
-            add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_PARENT_ID, entry->parent_id);
-            add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_CALL_TIME, PANDA_STACK_ENTRY_DEFAULT_CALL_TIME);
+            add_assoc_string(new_stack, PANDA_NODE_STACK_MAPS_NAME, entity->name, 1);
+            add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_ID, entity->id);
+            add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_PARENT_ID, entity->parent_id);
+            add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_CALL_TIME, PANDA_STACK_ENTITY_DEFAULT_CALL_TIME);
             add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_WALL_TIME_US, wall_time_us);
             add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_CPU_TIME_US, cpu_time_us);
             add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_MEMORY_USAGE, memory_usage);
             add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_MEMORY_PEAK_USAGE, memory_peak_usage);
-            add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_LEVEL, entry->level);
-            add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_START_TIME_MS, entry->start_us / 1000);
-            add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_END_TIME_MS, entry->end_us / 1000);
+            add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_LEVEL, entity->level);
+            add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_START_TIME_MS, entity->start_us / 1000);
+            add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_END_TIME_MS, entity->end_us / 1000);
             if (expend_data) {
                 add_assoc_zval(new_stack, PANDA_NODE_STACK_MAPS_REFRENCES, expend_data);
                 Z_ADDREF_P(expend_data);
             }
 
-            add_index_zval(zv, entry->id, new_stack);
+            add_index_zval(zv, entity->id, new_stack);
             Z_ADDREF_P(new_stack);
             PANDA_ARRAY_DESTROY(new_stack);
         }
@@ -188,30 +188,30 @@ uint64 panda_stack_cycle_timer(TSRMLS_D)
     return val;
 }
 
-int panda_stack_free_entry(panda_stack_entry_t *entry TSRMLS_DC)
+int panda_stack_free_entity(panda_stack_entity_t *entity TSRMLS_DC)
 {
-    if (PANDA_G(stack_prev_entry)) {
-        PANDA_STACK_DESTROY_ENTRY(PANDA_G(stack_prev_entry));
+    if (PANDA_G(stack_prev_entity)) {
+        PANDA_STACK_DESTROY_ENTITY(PANDA_G(stack_prev_entity));
     }
 
-    if (entry->prev_entry == NULL) {
-        PANDA_STACK_DESTROY_ENTRY(entry);
-        PANDA_G(stack_prev_entry) = NULL;
+    if (entity->prev_entity == NULL) {
+        PANDA_STACK_DESTROY_ENTITY(entity);
+        PANDA_G(stack_prev_entity) = NULL;
     } else {
-        PANDA_G(stack_prev_entry) = entry;
+        PANDA_G(stack_prev_entity) = entity;
     }
     return PANDA_TRUE;
 }
 
-int panda_stack_get_entry_id(panda_stack_entry_t *entry, int must_new TSRMLS_DC)
+int panda_stack_get_entity_id(panda_stack_entity_t *entity, int must_new TSRMLS_DC)
 {
-    if (PANDA_G(config_stack_merge) && !must_new && PANDA_G(stack_prev_entry) != NULL && (PANDA_G(stack_prev_entry)->level == entry->level) &&
-        (strncmp(PANDA_G(stack_prev_entry)->name, entry->name, entry->name_len) == 0)) {
-        PANDA_G(stack_entry_id) = PANDA_G(stack_prev_entry)->id;
+    if (PANDA_G(config_stack_merge) && !must_new && PANDA_G(stack_prev_entity) != NULL && (PANDA_G(stack_prev_entity)->level == entity->level) &&
+        (strncmp(PANDA_G(stack_prev_entity)->name, entity->name, entity->name_len) == 0)) {
+        PANDA_G(stack_entity_id) = PANDA_G(stack_prev_entity)->id;
     } else {
-        PANDA_G(stack_entry_id)++;
+        PANDA_G(stack_entity_id)++;
     }
-    return PANDA_G(stack_entry_id);
+    return PANDA_G(stack_entity_id);
 }
 
 void **panda_stack_get_execute_parameters(zend_execute_data *execute_data TSRMLS_DC)

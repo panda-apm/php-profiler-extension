@@ -27,7 +27,7 @@ int panda_resource_init_globals(TSRMLS_D)
     PANDA_HASHTABLE_INIT(&PANDA_G(resource_index_object_stmt_table));
     PANDA_HASHTABLE_INIT(&PANDA_G(resource_index_hashkey_resources_table));
     PANDA_HASHTABLE_INIT(&PANDA_G(resource_index_last_instances_table));
-    PANDA_HASHTABLE_INIT(&PANDA_G(resource_index_curl_entry_table));
+    PANDA_HASHTABLE_INIT(&PANDA_G(resource_index_curl_entity_table));
     PANDA_HASHTABLE_INIT(&PANDA_G(reosurce_index_object_chilrens_table));
     return SUCCESS;
 }
@@ -43,7 +43,7 @@ int panda_resource_destroy_globals(TSRMLS_D)
     PANDA_HASHTABLE_DESTROY(&PANDA_G(resource_index_object_stmt_table));
     PANDA_HASHTABLE_DESTROY(&PANDA_G(resource_index_hashkey_resources_table));
     PANDA_HASHTABLE_DESTROY(&PANDA_G(resource_index_last_instances_table));
-    PANDA_HASHTABLE_DESTROY(&PANDA_G(resource_index_curl_entry_table));
+    PANDA_HASHTABLE_DESTROY(&PANDA_G(resource_index_curl_entity_table));
     PANDA_HASHTABLE_DESTROY(&PANDA_G(reosurce_index_object_chilrens_table));
     return SUCCESS;
 }
@@ -253,20 +253,20 @@ int panda_resource_get_instance_id_with_stmt_id(ulong stmt_id, int *instance_id 
     return status;
 }
 
-int panda_resource_set_url_entry_with_instance_id(int instance_id, panda_url_entry_t *url_entry TSRMLS_DC)
+int panda_resource_set_url_entity_with_instance_id(int instance_id, panda_url_entity_t *url_entity TSRMLS_DC)
 {
-    HashTable *ht = &PANDA_G(resource_index_curl_entry_table);
-    return zend_hash_index_update(ht, instance_id, (void **)&url_entry, sizeof(panda_url_entry_t), NULL);
+    HashTable *ht = &PANDA_G(resource_index_curl_entity_table);
+    return zend_hash_index_update(ht, instance_id, (void **)&url_entity, sizeof(panda_url_entity_t), NULL);
 }
 
-int panda_resource_get_url_entry_with_instance_id(int instance_id, panda_url_entry_t  **url_entry TSRMLS_DC)
+int panda_resource_get_url_entity_with_instance_id(int instance_id, panda_url_entity_t  **url_entity TSRMLS_DC)
 {
-    HashTable *ht = &PANDA_G(resource_index_curl_entry_table);
+    HashTable *ht = &PANDA_G(resource_index_curl_entity_table);
     int status = FAILURE;
     do {
         void **data;
         if (zend_hash_index_find(ht, instance_id, (void **)&data) == SUCCESS) {
-            *url_entry = *data;
+            *url_entity = *data;
             status = SUCCESS;
         }
     } while(0);

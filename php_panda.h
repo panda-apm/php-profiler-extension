@@ -114,7 +114,7 @@ typedef long int int64;
 typedef unsigned char uint8;
 #endif
 
-typedef struct panda_stack_entry {
+typedef struct panda_stack_entity {
     int    level;
     char   *name;
     int    name_len;
@@ -129,14 +129,14 @@ typedef struct panda_stack_entry {
     uint64 start_us;
     uint64 end_us;
     ulong  hash_code;
-    struct panda_stack_entry *prev_entry;
-} panda_stack_entry_t;
+    struct panda_stack_entity *prev_entity;
+} panda_stack_entity_t;
 
 
-typedef struct _panda_url_entry {
+typedef struct _panda_url_entity {
     char *url;
     int url_len;
-} panda_url_entry_t;
+} panda_url_entity_t;
 
 
 ZEND_BEGIN_MODULE_GLOBALS(panda)
@@ -168,12 +168,12 @@ zval *node_extend;
 zval *node_resource;
 
 /* stack variables */
-panda_stack_entry_t *stack_entries;
-panda_stack_entry_t *stack_prev_entry;
+panda_stack_entity_t *stack_entries;
+panda_stack_entity_t *stack_prev_entity;
 zval *stack_maps;
 long stack_count;
 long stack_max_level;
-int stack_entry_id;
+int stack_entity_id;
 
 /* exception variables*/
 int exception_count;
@@ -203,7 +203,7 @@ HashTable resource_index_object_prepare_sqls_table;
 HashTable resource_index_object_stmt_table;
 HashTable resource_index_hashkey_resources_table;
 HashTable resource_index_last_instances_table;
-HashTable resource_index_curl_entry_table;
+HashTable resource_index_curl_entity_table;
 HashTable reosurce_index_object_chilrens_table;
 
 ZEND_END_MODULE_GLOBALS(panda)
