@@ -70,9 +70,9 @@ int panda_stack_begin_profiling(TSRMLS_D)
 int panda_stack_end_profiling(TSRMLS_D)
 {
     //Program to join the die directive. so need while
-    while (PANDA_G(stack_prev_entry)) {
+    //while (PANDA_G(stack_prev_entry)) {
         PANDA_STACK_END_PROFILING(&PANDA_G(stack_entries), NULL, NULL);
-    }
+    //}
     return SUCCESS;
 }
 
