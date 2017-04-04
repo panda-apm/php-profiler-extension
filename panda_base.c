@@ -30,6 +30,7 @@ int panda_base_compose_node(TSRMLS_D)
         if (panda_base_generate_uuid(uuid_str TSRMLS_CC) == SUCCESS) {
             add_assoc_string(zv, PANDA_NODE_BASE_ID, uuid_str, PANDA_TRUE);
         }
+        add_assoc_string(zv, PANDA_NODE_BASE_KEY, PANDA_G(config_key), PANDA_TRUE);
         status = SUCCESS;
     } while(0);
     return status;

@@ -70,6 +70,12 @@ extern zend_module_entry panda_module_entry;
 #define PANDA_MN(cls, name) PHP_MN(panda_expend_##cls##_##name)
 #define PANDA_MACRO_STR(macro) #macro
 
+#define PANDA_TRAN_COMMAND_EOF "|"
+#define PANDA_TRAN_COMMAND_OK "OK"
+#define PANDA_TRAN_COMMAND_REGISTER  "register"
+#define PANDA_TRAN_COMMAND_REGISTER_MAX_BUF_LEN 42
+#define PANDA_TRAN_COMMAND_REGISTER_MAX_RES_BUF_LEN 30
+
 #define PANDA_LOG(message)                                                                         \
     do {                                                                                           \
         if (PANDA_G(config_enable_log)) {                                                          \
@@ -149,12 +155,15 @@ zend_bool config_collect_request_post;
 zend_bool config_collect_request_cookie;
 zend_bool config_stack_merge;
 zend_bool config_enable_log;
+char* config_key;
 char* config_log_file;
 char* config_unix_socket;
 int config_limit_time;
 int config_limit_function_time;
 int config_stack_max_nodes;
 int config_stack_max_levels;
+/*command variables*/
+int registered;
 
 /* node variables*/
 zval *node_base;
@@ -207,4 +216,6 @@ HashTable resource_index_curl_entity_table;
 HashTable reosurce_index_object_chilrens_table;
 
 ZEND_END_MODULE_GLOBALS(panda)
+
+int remote_register(char *key TSRMLS_DC);
 #endif	/* PHP_PANDA_H */
