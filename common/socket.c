@@ -10,7 +10,7 @@
 #include <sys/un.h>
 #include "common/socket.h"
 
-int send_result(char *socket_path,  char* buf, int buf_len)
+int send_result(char *socket_path,  char* buf, int buf_len, char *recv_message, int recv_message_len)
 {
     struct sockaddr_un serveraddr;
     int sd;
@@ -27,13 +27,22 @@ int send_result(char *socket_path,  char* buf, int buf_len)
         strcpy(serveraddr.sun_path, socket_path);
 
         if (connect(sd, (struct sockaddr *)&serveraddr, SUN_LEN(&serveraddr)) < 0) {
-            close(sd);
             break;
         }
 
-        if (send(sd, buf, buf_len, 0) > 0) {
-            status = 1;
+        if (write(sd, buf, buf_len) < 0) {
+            break;
         }
+
+        if (recv_message_len) {
+            int readLen = read(sd, recv_message, recv_message_len);
+            if (readLen < 0) {
+                break;
+            }
+            recv_message[readLen] = '\0';
+        }
+
+        status = 1;
         close(sd);
     } while (0);
     return status;
