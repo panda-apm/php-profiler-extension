@@ -12,16 +12,16 @@
 ZEND_EXTERN_MODULE_GLOBALS(panda)
 int panda_response_compose_node(TSRMLS_D)
 {
+    zval *zv = PANDA_G(node_response);
     if (!panda_request_is_cli_mode(TSRMLS_C)) {
-        zval *zv = PANDA_G(node_response);
         char *mimetype = SG(sapi_headers.mimetype);
         if (mimetype == NULL) {
             mimetype = SAPI_DEFAULT_MIMETYPE;
         }
         add_assoc_long(zv, PANDA_NODE_RESPONSE_HTTP_STATUS, (long)SG(sapi_headers.http_response_code));
         add_assoc_string(zv, PANDA_NODE_RESPONSE_HTTP_MIMETYPE, mimetype, PANDA_TRUE);
-        add_assoc_long(zv, PANDA_NODE_RESPONSE_RESPONSE_TIME, time(NULL));
     }
+    add_assoc_long(zv, PANDA_NODE_RESPONSE_RESPONSE_TIME, time(NULL));
     return PANDA_TRUE;
 }
 
