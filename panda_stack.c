@@ -76,10 +76,27 @@ int panda_stack_end_profiling(TSRMLS_D)
     return SUCCESS;
 }
 
+
+int panda_stack_walltime_ms(TSRMLS_D)
+{
+    zval **entity;
+    int *data;
+    int64 walltime, walltime_ms;
+    if (zend_hash_index_find(Z_ARRVAL_P(PANDA_G(stack_maps)), 0, (void **)&entity) == SUCCESS) {
+        if (zend_hash_find(Z_ARRVAL_PP(entity), PANDA_NODE_STACK_MAPS_WALL_TIME_US,
+                PANDA_STRLEN(PANDA_NODE_STACK_MAPS_WALL_TIME_US), (void **)&data)) {
+            walltime = *data;
+        }
+    }
+    walltime_ms = walltime / 1000;
+    return walltime_ms;
+}
+
+
 int panda_stack_compose_node(TSRMLS_D)
 {
     zval *zv = PANDA_G(node_stack);
-    zend_hash_sort(Z_ARRVAL_P(PANDA_G(stack_maps)), zend_qsort, panda_array_stack_compare, 0 TSRMLS_CC);
+    zend_hash_sort(Z_ARRVAL_P(PANDA_G(stack_maps)), zend_qsort, panda_stack_array_compare, 0 TSRMLS_CC);
 
     Z_ADDREF_P(PANDA_G(stack_maps));
     add_assoc_zval(zv, PANDA_NODE_STACK_MAPS, PANDA_G(stack_maps));
@@ -118,10 +135,11 @@ int panda_stack_extract_entity_data(panda_stack_entity_t *entity, zend_execute_d
     zval **stack;
 
     int status = FAILURE;
-    int64 wall_time_us = PANDA_STACK_GET_ENTITY_WALL_TIME(entity);
+    int64 walltime_us = PANDA_STACK_GET_ENTITY_WALL_TIME(entity);
     int64 cpu_time_us = PANDA_STACK_GET_ENTITY_CPU_TIME(entity);
     int64 memory_usage = PANDA_STACK_GET_ENTITY_MEMORY_USAGE(entity);
     int64 memory_peak_usage = PANDA_STACK_GET_ENTITY_MEMORY_PEAK_USAGE(entity);
+    int walltime_ms = walltime_us / 1000;
 
     PANDA_G(stack_count)++;
     if (entity->level > PANDA_G(stack_max_level)) {
@@ -129,8 +147,8 @@ int panda_stack_extract_entity_data(panda_stack_entity_t *entity, zend_execute_d
     }
 
     do {
-        if (wall_time_us < PANDA_G(config_limit_function_time)) {
-           //break;
+        if (walltime_ms < PANDA_G(config_limit_function_time)) {
+            break;
         }
 
         if (entity->level > PANDA_G(config_stack_max_levels)) {
@@ -143,7 +161,7 @@ int panda_stack_extract_entity_data(panda_stack_entity_t *entity, zend_execute_d
 
         if (zend_hash_index_find(Z_ARRVAL_P(zv), (ulong)entity->id, (void **)&stack) == SUCCESS) {
             PANDA_ASSOC_ARRAY_INC_NUM(*stack, PANDA_NODE_STACK_MAPS_CALL_TIME, 1);
-            PANDA_ASSOC_ARRAY_INC_NUM(*stack, PANDA_NODE_STACK_MAPS_WALL_TIME_US, wall_time_us);
+            PANDA_ASSOC_ARRAY_INC_NUM(*stack, PANDA_NODE_STACK_MAPS_WALL_TIME_US, walltime_us);
             PANDA_ASSOC_ARRAY_INC_NUM(*stack, PANDA_NODE_STACK_MAPS_CPU_TIME_US, cpu_time_us);
             PANDA_ASSOC_ARRAY_INC_NUM(*stack, PANDA_NODE_STACK_MAPS_MEMORY_USAGE, memory_usage);
             PANDA_ASSOC_ARRAY_INC_NUM(*stack, PANDA_NODE_STACK_MAPS_MEMORY_PEAK_USAGE, memory_peak_usage);
@@ -155,7 +173,7 @@ int panda_stack_extract_entity_data(panda_stack_entity_t *entity, zend_execute_d
             add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_ID, entity->id);
             add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_PARENT_ID, entity->parent_id);
             add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_CALL_TIME, PANDA_STACK_ENTITY_DEFAULT_CALL_TIME);
-            add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_WALL_TIME_US, wall_time_us);
+            add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_WALL_TIME_US, walltime_us);
             add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_CPU_TIME_US, cpu_time_us);
             add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_MEMORY_USAGE, memory_usage);
             add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_MEMORY_PEAK_USAGE, memory_peak_usage);
@@ -287,7 +305,7 @@ char *panda_stack_get_function_name(zend_execute_data *execute_data TSRMLS_DC)
     return function_name;
 }
 
-static int panda_array_stack_compare(const void *a, const void *b TSRMLS_DC)
+static int panda_stack_array_compare(const void *a, const void *b TSRMLS_DC)
 {
     Bucket *f;
     Bucket *s;

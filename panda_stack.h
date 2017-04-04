@@ -112,6 +112,7 @@ int panda_stack_init_hooks(TSRMLS_D);
 int panda_stack_destroy_hooks(TSRMLS_D);
 int panda_stack_begin_profiling(TSRMLS_D);
 int panda_stack_end_profiling(TSRMLS_D);
+int panda_stack_walltime_ms(TSRMLS_D);
 uint64 panda_stack_cycle_timer(TSRMLS_D);
 int panda_stack_free_entity(panda_stack_entity_t *entity TSRMLS_DC);
 void **panda_stack_get_execute_parameters(zend_execute_data *execute_data TSRMLS_DC);
@@ -123,5 +124,6 @@ ulong panda_stack_get_resource_hash(const char *host, int port TSRMLS_DC);
 char *panda_stack_get_function_name(zend_execute_data *execute_data TSRMLS_DC);
 static inline int panda_stcak_inc_entity_item_num(zval *zv, char* name, int64 num TSRMLS_DC);
 static inline long panda_stack_get_us_interval(struct timeval *start, struct timeval *end TSRMLS_DC);
-static int panda_array_stack_compare(const void *a, const void *b TSRMLS_DC);
+static int panda_stack_array_compare(const void *a, const void *b TSRMLS_DC);
+
 #endif
