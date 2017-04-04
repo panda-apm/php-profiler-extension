@@ -108,10 +108,8 @@ int panda_request_destroy_globals(TSRMLS_D)
 int panda_request_is_cli_mode(TSRMLS_D)
 {
     int res = PANDA_FALSE;
-    if (!SG(request_info).request_method) {
-        if (!strncasecmp(sapi_module.name, "cli", 3)) {
-           res = PANDA_TRUE;
-        }
+    if (!strncasecmp(sapi_module.name, "cli", 3)) {
+       res = PANDA_TRUE;
     }
     return res;
 }
