@@ -69,10 +69,16 @@ int panda_stack_begin_profiling(TSRMLS_D)
 
 int panda_stack_end_profiling(TSRMLS_D)
 {
-    //Program to join the die directive. so need while
-    //while (PANDA_G(stack_prev_entity)) {
-        PANDA_STACK_END_PROFILING(&PANDA_G(stack_entries), NULL, NULL);
-    //}
+    PANDA_STACK_END_PROFILING(&PANDA_G(stack_entries), NULL, NULL);
+
+    int main_walltime_ms =  panda_stack_walltime_ms(TSRMLS_C);
+    if (main_walltime_ms < PANDA_G(config_limit_time_ms)) {
+        php_splice(Z_ARRVAL_P(PANDA_G(node_stack)), 0, 1, NULL, (zend_uint)NULL, NULL TSRMLS_CC);
+        panda_stack_set_slowly_flag(PANDA_FALSE, PANDA_G(config_limit_time_ms) TSRMLS_CC);
+    } else {
+        panda_stack_set_slowly_flag(PANDA_TRUE, PANDA_G(config_limit_time_ms) TSRMLS_CC);
+    }
+
     return SUCCESS;
 }
 
@@ -128,7 +134,6 @@ int panda_stack_destroy_hooks(TSRMLS_C)
     return SUCCESS;
 }
 
-
 int panda_stack_extract_entity_data(panda_stack_entity_t *entity, zend_execute_data *execute_data, zval *expend_data TSRMLS_DC)
 {
     zval *zv = PANDA_G(stack_maps);
@@ -139,7 +144,6 @@ int panda_stack_extract_entity_data(panda_stack_entity_t *entity, zend_execute_d
     int64 cpu_time_us = PANDA_STACK_GET_ENTITY_CPU_TIME(entity);
     int64 memory_usage = PANDA_STACK_GET_ENTITY_MEMORY_USAGE(entity);
     int64 memory_peak_usage = PANDA_STACK_GET_ENTITY_MEMORY_PEAK_USAGE(entity);
-    int walltime_ms = walltime_us / 1000;
 
     PANDA_G(stack_count)++;
     if (entity->level > PANDA_G(stack_max_level)) {
@@ -147,16 +151,18 @@ int panda_stack_extract_entity_data(panda_stack_entity_t *entity, zend_execute_d
     }
 
     do {
-        if (walltime_ms < PANDA_G(config_limit_function_time)) {
-            break;
-        }
+        if (execute_data != NULL) {
+            if (walltime_us < PANDA_G(config_limit_function_time_us)) {
+               break;
+            }
 
-        if (entity->level > PANDA_G(config_stack_max_levels)) {
-            break;
-        }
+            if (entity->level > PANDA_G(config_stack_max_levels)) {
+                break;
+            }
 
-        if (PANDA_G(stack_count) > PANDA_G(config_stack_max_nodes)) {
-            break;
+            if (PANDA_G(stack_count) > PANDA_G(config_stack_max_nodes)) {
+                break;
+            }
         }
 
         if (zend_hash_index_find(Z_ARRVAL_P(zv), (ulong)entity->id, (void **)&stack) == SUCCESS) {
@@ -267,11 +273,6 @@ ulong panda_stack_get_resource_hash(const char* host, int port TSRMLS_DC)
     return hash;
 }
 
-static inline long panda_stack_get_us_interval(struct timeval *start, struct timeval *end TSRMLS_DC)
-{
-    return (((end->tv_sec - start->tv_sec) * 1000000) + (end->tv_usec - start->tv_usec));
-}
-
 char *panda_stack_get_function_name(zend_execute_data *execute_data TSRMLS_DC)
 {
     char *function_name = NULL;
@@ -304,6 +305,22 @@ char *panda_stack_get_function_name(zend_execute_data *execute_data TSRMLS_DC)
     } while (0);
     return function_name;
 }
+
+
+static inline long panda_stack_get_us_interval(struct timeval *start, struct timeval *end TSRMLS_DC)
+{
+    return (((end->tv_sec - start->tv_sec) * 1000000) + (end->tv_usec - start->tv_usec));
+}
+
+static inline void panda_stack_set_slowly_flag(int flag, int refrence_value TSRMLS_DC)
+{
+    zval **entity;
+    if (zend_hash_index_find(Z_ARRVAL_P(PANDA_G(stack_maps)), 0, (void **)&entity) == SUCCESS) {
+        add_assoc_long(*entity, PANDA_NODE_STACK_MAPS_SLOWLY, flag);
+        add_assoc_long(*entity, PANDA_NODE_STACK_MAPS_SLOWLY_REFRENCE_VALUE, refrence_value);
+    }
+}
+
 
 static int panda_stack_array_compare(const void *a, const void *b TSRMLS_DC)
 {

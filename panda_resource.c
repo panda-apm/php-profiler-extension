@@ -48,30 +48,18 @@ int panda_resource_destroy_globals(TSRMLS_D)
     return SUCCESS;
 }
 
-int panda_resource_set_resource( const char *type, char *host, int port)
+int panda_resource_set_resource(const char *type, char *host, int port, ulong hash TSRMLS_DC)
 {
     zval *map = PANDA_G(resources_maps);
     int status = FAILURE;
-    zval **type_map_p;
     zval *new_val;
     do {
         PANDA_ARRAY_INIT(new_val);
         add_assoc_string(new_val, PANDA_NODE_RESOURCE_MAPS_HOST, host, PANDA_TRUE);
+        add_assoc_string(new_val, PANDA_NODE_RESOURCE_MAPS_TYPE, (char *)type, PANDA_TRUE);
         add_assoc_long(new_val, PANDA_NODE_RESOURCE_MAPS_PORT, port);
-
-        if (zend_hash_find(Z_ARRVAL_P(map), type, PANDA_STRLEN(type), (void **)&type_map_p) == FAILURE) {
-            zval *new_type_map;
-            PANDA_ARRAY_INIT(new_type_map);
-            add_index_zval(new_type_map, 0, new_val);
-            add_assoc_zval(map, type, new_type_map);
-            Z_ADDREF_P(new_type_map);
-            PANDA_ARRAY_DESTROY(new_type_map);
-        } else {
-            zval *type_map = *type_map_p;
-            if (Z_TYPE_P(type_map) == IS_ARRAY) {
-                add_next_index_zval(type_map, new_val);
-            }
-        }
+        add_assoc_long(new_val, PANDA_NODE_RESOURCE_MAPS_HASH, hash);
+        add_next_index_zval(map, new_val);
         Z_ADDREF_P(new_val);
         PANDA_ARRAY_DESTROY(new_val);
         status = SUCCESS;

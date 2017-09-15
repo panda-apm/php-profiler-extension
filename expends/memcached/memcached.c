@@ -109,7 +109,7 @@ PANDA_METHOD(memcached, addserver)
     ulong host_port_hash = panda_stack_get_resource_hash(host, port TSRMLS_CC);
 
     if (panda_resource_get_resource_id_with_hashkey(host_port_hash, &resource_id TSRMLS_CC) == FAILURE) {
-        panda_resource_set_resource(PANDA_RESOURCE_TYPE_MEMCACHE, host, port TSRMLS_CC);
+        panda_resource_set_resource(PANDA_RESOURCE_TYPE_MEMCACHE, host, port, host_port_hash TSRMLS_CC);
         if (panda_resource_get_resource_last_insert_id(PANDA_RESOURCE_TYPE_MEMCACHE, &resource_id TSRMLS_CC) == SUCCESS) {
             panda_resource_set_resource_id_with_hashkey(host_port_hash, resource_id TSRMLS_CC);
         }
@@ -174,7 +174,7 @@ PANDA_METHOD(memcached, addservers)
         ulong host_port_hash = panda_stack_get_resource_hash(host, port TSRMLS_CC);
 
         if (panda_resource_get_resource_id_with_hashkey(host_port_hash, &resource_id TSRMLS_CC) == FAILURE) {
-            panda_resource_set_resource(PANDA_RESOURCE_TYPE_MEMCACHE, host, port TSRMLS_CC);
+            panda_resource_set_resource(PANDA_RESOURCE_TYPE_MEMCACHE, host, port, host_port_hash TSRMLS_CC);
             if (panda_resource_get_resource_last_insert_id(PANDA_RESOURCE_TYPE_MEMCACHE, &resource_id TSRMLS_CC) == SUCCESS) {
                 panda_resource_set_resource_id_with_hashkey(host_port_hash, resource_id TSRMLS_CC);
             }

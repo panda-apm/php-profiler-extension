@@ -12,9 +12,9 @@ ZEND_EXTERN_MODULE_GLOBALS(panda);
 int panda_compile_compose_node(TSRMLS_D)
 {
     zval *zv = PANDA_G(node_compile);
-    add_assoc_long(zv, PANDA_NODE_COMPILE_FILE_COUNT, PANDA_G(compile_file_count));
+    add_assoc_long(zv, PANDA_NODE_COMPILE_FILE_NUM, PANDA_G(compile_file_count));
     add_assoc_long(zv, PANDA_NODE_COMPILE_FILE_WALLTIME, PANDA_G(compile_file_walltime));
-    add_assoc_long(zv, PANDA_NODE_COMPILE_STRING_COUNT, PANDA_G(compile_string_count));
+    add_assoc_long(zv, PANDA_NODE_COMPILE_STRING_NUM, PANDA_G(compile_string_count));
     add_assoc_long(zv, PANDA_NODE_COMPILE_STRING_WALLTIME, PANDA_G(compile_string_walltime));
     return SUCCESS;
 }

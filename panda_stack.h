@@ -23,6 +23,8 @@
 #define PANDA_NODE_STACK_MAPS_MEMORY_PEAK_USAGE "pmu"
 #define PANDA_NODE_STACK_MAPS_CALL_TIME "ct"
 #define PANDA_NODE_STACK_MAPS_CPU_TIME_US "ct_us"
+#define PANDA_NODE_STACK_MAPS_SLOWLY "s"
+#define PANDA_NODE_STACK_MAPS_SLOWLY_REFRENCE_VALUE "s_r_ms"
 #define PANDA_NODE_STACK_MAPS_LEVEL "l"
 #define PANDA_NODE_STACK_MAPS_REFRENCES "_refs"
 
@@ -125,5 +127,5 @@ char *panda_stack_get_function_name(zend_execute_data *execute_data TSRMLS_DC);
 static inline int panda_stcak_inc_entity_item_num(zval *zv, char* name, int64 num TSRMLS_DC);
 static inline long panda_stack_get_us_interval(struct timeval *start, struct timeval *end TSRMLS_DC);
 static int panda_stack_array_compare(const void *a, const void *b TSRMLS_DC);
-
+static inline void panda_stack_set_slowly_flag(int flag, int refrence_value TSRMLS_DC);
 #endif

@@ -60,7 +60,7 @@ PANDA_METHOD(pdo, pdo)
         ulong host_port_hash = panda_stack_get_resource_hash(host, port TSRMLS_CC);
 
         if (panda_resource_get_resource_id_with_hashkey(host_port_hash, &resource_id TSRMLS_CC) == FAILURE) {
-            panda_resource_set_resource(PANDA_RESOURCE_TYPE_MYSQL, host, port TSRMLS_CC);
+            panda_resource_set_resource(PANDA_RESOURCE_TYPE_MYSQL, host, port, host_port_hash TSRMLS_CC);
             if (panda_resource_get_resource_last_insert_id(PANDA_RESOURCE_TYPE_MYSQL, &resource_id TSRMLS_CC) == SUCCESS) {
                 panda_resource_set_resource_id_with_hashkey(host_port_hash, resource_id TSRMLS_CC);
             }
@@ -306,7 +306,7 @@ static int php_pdo_parse_data_source(const char *data_source,
             semi = i;
         }
 
-        /* find the entry in the array */
+        /* find the entity in the array */
         nlen = valstart - optstart - 1;
         for (j = 0; j < nparams; j++) {
             if (0 == strncmp(data_source + optstart, parsed[j].optname, nlen) && parsed[j].optname[nlen] == '\0') {

@@ -9,12 +9,14 @@
 #define PANDA_NODE_RESOURCE_SQLS "sqls"
 #define PANDA_NODE_RESOURCE_MAPS "maps"
 #define PANDA_NODE_RESOURCE_MAPS_HOST "host"
+#define PANDA_NODE_RESOURCE_MAPS_HASH "hash"
 #define PANDA_NODE_RESOURCE_MAPS_PORT "port"
+#define PANDA_NODE_RESOURCE_MAPS_TYPE "type"
 
 int panda_resource_compose_node(TSRMLS_D);
 int panda_resource_init_globals(TSRMLS_D);
 int panda_resource_destroy_globals(TSRMLS_D);
-int panda_resource_set_resource(const char *type, char *host, int port TSRMLS_DC);
+int panda_resource_set_resource(const char *type, char *host, int port, ulong hash TSRMLS_DC);
 int panda_resource_get_resource_last_insert_id(const char *type, int *resource_id TSRMLS_DC);
 int panda_resource_get_resource_id_with_hashkey(ulong hash, int *resource_id TSRMLS_DC);
 int panda_resource_set_resource_id_with_hashkey(ulong hash, int resource_id TSRMLS_DC);

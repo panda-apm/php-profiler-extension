@@ -2,9 +2,9 @@
 #define PHP_PANDA_COMPILE_H
 
 #define PANDA_NODE_COMPILE "compile"
-#define PANDA_NODE_COMPILE_FILE_COUNT    "file_count"
+#define PANDA_NODE_COMPILE_FILE_NUM    "file_num"
 #define PANDA_NODE_COMPILE_FILE_WALLTIME "file_walltime"
-#define PANDA_NODE_COMPILE_STRING_COUNT   "string_count"
+#define PANDA_NODE_COMPILE_STRING_NUM   "string_num"
 #define PANDA_NODE_COMPILE_STRING_WALLTIME "string_walltime"
 
 static zend_op_array * (*_panda_compile_file_execute) (zend_file_handle *file_handle, int type TSRMLS_DC);
