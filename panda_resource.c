@@ -148,19 +148,28 @@ int panda_resource_set_sql(const char *type, char *sql TSRMLS_DC)
     zval *maps = PANDA_G(resources_sqls);
 
     do {
+        zval *new_type;
+        ulong sql_hash = zend_inline_hash_func(sql, PANDA_STRLEN(sql));
+        PANDA_ARRAY_INIT(new_type);
+        add_assoc_string(new_type, PANDA_NODE_RESOURCE_SQLS_SQL, sql, 1);
+        add_assoc_long(new_type, PANDA_NODE_RESOURCE_SQLS_HASH, sql_hash);
+        Z_ADDREF_P(new_type);
+
         if (zend_hash_find(Z_ARRVAL_P(maps), type, PANDA_STRLEN(type), (void **)&type_map_p) == FAILURE) {
             zval *new_type_map;
             PANDA_ARRAY_INIT(new_type_map);
-            add_index_string(new_type_map, 0, sql, 1);
-            add_assoc_zval(maps, type, new_type_map);
             Z_ADDREF_P(new_type_map);
+            add_next_index_zval(new_type_map, new_type);
+            add_assoc_zval(maps, type, new_type_map);
             PANDA_ARRAY_DESTROY(new_type_map);
         } else {
             zval *type_map = *type_map_p;
             if (Z_TYPE_P(type_map) == IS_ARRAY) {
-                add_next_index_string(type_map, sql, 1);
+                add_next_index_zval(type_map, new_type);
             }
         }
+
+        PANDA_ARRAY_DESTROY(new_type);
         status = SUCCESS;
     } while(0);
     return SUCCESS;

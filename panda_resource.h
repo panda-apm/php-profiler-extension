@@ -8,10 +8,12 @@
 #define PANDA_NODE_RESOURCE "resource"
 #define PANDA_NODE_RESOURCE_SQLS "sqls"
 #define PANDA_NODE_RESOURCE_MAPS "maps"
-#define PANDA_NODE_RESOURCE_MAPS_HOST "host"
-#define PANDA_NODE_RESOURCE_MAPS_HASH "hash"
-#define PANDA_NODE_RESOURCE_MAPS_PORT "port"
-#define PANDA_NODE_RESOURCE_MAPS_TYPE "type"
+#define PANDA_NODE_RESOURCE_MAPS_HOST   "host"
+#define PANDA_NODE_RESOURCE_MAPS_HASH   "hash"
+#define PANDA_NODE_RESOURCE_MAPS_PORT   "port"
+#define PANDA_NODE_RESOURCE_MAPS_TYPE   "type"
+#define PANDA_NODE_RESOURCE_SQLS_SQL    "sql"
+#define PANDA_NODE_RESOURCE_SQLS_HASH   "hash"
 
 int panda_resource_compose_node(TSRMLS_D);
 int panda_resource_init_globals(TSRMLS_D);
@@ -25,7 +27,7 @@ int panda_resource_get_resource_id_with_instance_id(ulong instance_id, int *reso
 int panda_resource_set_last_instance_id(const char* type, int resource_id TSRMLS_DC);
 int panda_resource_get_last_instance_id( const char* type, int *resource_id TSRMLS_DC);
 int panda_resource_set_sql(const char *type, char *sql TSRMLS_DC);
-int panda_resource_get_sql_last_id(const char *type, int *resource_id TSRMLS_DC);
+int panda_resource_get_sql_last_id(const char* type, int *resource_id TSRMLS_DC);
 int panda_resource_set_db_with_instance_id(ulong instance_id, const char *db TSRMLS_DC);
 int panda_resource_get_db_with_instance_id(ulong instance_id, char **db TSRMLS_DC);
 int panda_resource_set_prepare_sql_with_stmt_id(ulong stmt_id, char *prepare_sql TSRMLS_DC);

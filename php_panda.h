@@ -70,11 +70,26 @@ extern zend_module_entry panda_module_entry;
 #define PANDA_MN(cls, name) PHP_MN(panda_expend_##cls##_##name)
 #define PANDA_MACRO_STR(macro) #macro
 
-#define PANDA_TRAN_COMMAND_EOF "|"
-#define PANDA_TRAN_COMMAND_OK "OK"
-#define PANDA_TRAN_COMMAND_REGISTER  "register"
-#define PANDA_TRAN_COMMAND_REGISTER_MAX_BUF_LEN 42
-#define PANDA_TRAN_COMMAND_REGISTER_MAX_RES_BUF_LEN 30
+#define PANDA_TRAN_COMMAND_EOF "\n"
+#define PANDA_TRAN_COMMAND_NEW_CONFIG "new_config"
+#define PANDA_TRAN_COMMAND_REGISTER "register"
+#define PANDA_TRAN_COMMAND_RESP_STATUS "status"
+#define PANDA_TRAN_COMMAND_RESP_MESSAGE "message"
+#define PANDA_TRAN_COMMAND_RESP_MESSAGE_HASH   "_hash"
+#define PANDA_TRAN_COMMAND_RESP_MESSAGE_COLLECT_REQUEST_POST "collectRequestPost"
+#define PANDA_TRAN_COMMAND_RESP_MESSAGE_COLLECT_REQUEST_COOKIE "collectRequestCookie"
+#define PANDA_TRAN_COMMAND_RESP_MESSAGE_TRACE_STACK "traceStack"
+#define PANDA_TRAN_COMMAND_RESP_MESSAGE_TRACE_ERROR "traceError"
+#define PANDA_TRAN_COMMAND_RESP_MESSAGE_TRACE_EXCEPTION "traceException"
+#define PANDA_TRAN_COMMAND_RESP_MESSAGE_TRACE_COMPILE "traceCompile"
+#define PANDA_TRAN_COMMAND_RESP_MESSAGE_STACK_MERGE "stackMerge"
+#define PANDA_TRAN_COMMAND_RESP_MESSAGE_STACK_MAX_NODES "stackMaxNodes"
+#define PANDA_TRAN_COMMAND_RESP_MESSAGE_STACK_MAX_LEVELS "stackMaxLevels"
+#define PANDA_TRAN_COMMAND_RESP_MESSAGE_LIMIT_FUNCTION_TIME_US "limitFunctionTimeUs"
+#define PANDA_TRAN_COMMAND_RESP_MESSAGE_LIMIT_TIME_MS "limitTimeMs"
+#define PANDA_TRAN_COMMAND_REGISTER_MAX_BUF_LEN 46
+#define PANDA_TRAN_COMMAND_REGISTER_MAX_RES_BUF_LEN 512
+
 
 #define PANDA_LOG(message)                                                                         \
     do {                                                                                           \
@@ -108,7 +123,6 @@ extern zend_module_entry panda_module_entry;
             ZVAL_LONG(*item, Z_LVAL_PP(item) + num);                                               \
         }                                                                                          \
     } while(0)                                                                                     \
-
 
 #if !defined(uint64)
 typedef unsigned long long uint64;
@@ -147,10 +161,6 @@ typedef struct _panda_url_entity {
 
 ZEND_BEGIN_MODULE_GLOBALS(panda)
 /* config variables */
-zend_bool config_trace_error;
-zend_bool config_trace_exception;
-zend_bool config_trace_stack;
-zend_bool config_trace_compile;
 zend_bool config_collect_request_post;
 zend_bool config_collect_request_cookie;
 zend_bool config_stack_merge;
@@ -158,12 +168,14 @@ zend_bool config_enable_log;
 char* config_key;
 char* config_log_file;
 char* config_unix_socket;
-int config_limit_time;
-int config_limit_function_time;
+char* config_hash;
+int config_limit_function_time_us;
+int config_limit_time_ms;
 int config_stack_max_nodes;
 int config_stack_max_levels;
 /*command variables*/
-int registered;
+int is_registered;
+
 
 /* node variables*/
 zval *node_base;
@@ -217,5 +229,7 @@ HashTable reosurce_index_object_chilrens_table;
 
 ZEND_END_MODULE_GLOBALS(panda)
 
-int remote_register(char *key TSRMLS_DC);
+int remote_is_registered(char *register_key, zval *client_config TSRMLS_DC);
+int get_new_config(char *new_config, zval *client_config TSRMLS_DC);
+void  sync_config(zval *config TSRMLS_DC);
 #endif	/* PHP_PANDA_H */

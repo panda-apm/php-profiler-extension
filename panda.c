@@ -155,10 +155,10 @@ PHP_MSHUTDOWN_FUNCTION(panda)
 PHP_RINIT_FUNCTION(panda)
 {
     if (PANDA_G(is_registered)) {
-        if (PANDA_G(_config_hash)) {
+        if (PANDA_G(config_hash)) {
             zval *new_client_config;
             PANDA_ARRAY_INIT(new_client_config);
-            if (get_new_config(PANDA_G(_config_hash), new_client_config TSRMLS_CC) == SUCCESS) {
+            if (get_new_config(PANDA_G(config_hash), new_client_config TSRMLS_CC) == SUCCESS) {
                 zval **status = NULL;
                 zval **message = NULL;
                 if (zend_hash_find(Z_ARRVAL_P(new_client_config), PANDA_TRAN_COMMAND_RESP_STATUS,
@@ -340,15 +340,15 @@ void sync_config(zval *config TSRMLS_DC)
 
     if (zend_hash_find(Z_ARRVAL_P(config), PANDA_TRAN_COMMAND_RESP_MESSAGE_HASH,
         PANDA_STRLEN(PANDA_TRAN_COMMAND_RESP_MESSAGE_HASH), (void **)&hash) == SUCCESS) {
-        if (Z_TYPE_PP(hash) == IS_STRING) {
-            PANDA_G(_config_hash) = estrdup(Z_STRVAL_PP(hash));
+        if (Z_TYPE_PP(hash) == IS_STRING && Z_STRLEN_PP(hash) > 0) {
+            PANDA_G(config_hash) = estrndup(Z_STRVAL_PP(hash), 9);
         }
     }
 
     if (zend_hash_find(Z_ARRVAL_P(config), PANDA_TRAN_COMMAND_RESP_MESSAGE_COLLECT_REQUEST_POST,
         PANDA_STRLEN(PANDA_TRAN_COMMAND_RESP_MESSAGE_COLLECT_REQUEST_POST), (void **)&collect_request_post) == SUCCESS) {
         if (Z_TYPE_PP(collect_request_post) == IS_BOOL) {
-            PANDA_G(config_collect_request_post)  =Z_BVAL_PP(collect_request_post);
+            PANDA_G(config_collect_request_post) = Z_BVAL_PP(collect_request_post);
         }
     }
 
