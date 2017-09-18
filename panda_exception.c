@@ -21,7 +21,7 @@ int panda_exception_compose_node(TSRMLS_D)
 int panda_exception_init_hooks(TSRMLS_D)
 {
      _panda_exception_execute = zend_throw_exception_hook;
-     zend_throw_exception_hook = panda_exception_excecute;
+    zend_throw_exception_hook = panda_exception_excecute;
     return SUCCESS;
 }
 
@@ -67,15 +67,17 @@ static void panda_exception_excecute(zval *exception TSRMLS_DC)
         code = Z_LVAL_P(code_val);
         zend_get_object_classname(exception, &exception_name, &exception_name_len TSRMLS_CC);
 
-        if (zend_hash_find(Z_ARRVAL_P(zv), exception_name, exception_name_len + 1, (void **)&name_maps_data) == SUCCESS) {
-            PANDA_INDEX_ARRAY_INC_NUM(*name_maps_data, code, PANDA_EXCEPTION_DEFAULE_CODE_COUNT);
-        } else {
-            zval *name_maps;
-            PANDA_ARRAY_INIT(name_maps);
-            add_index_long(name_maps, code, PANDA_EXCEPTION_DEFAULE_CODE_COUNT);
-            add_assoc_zval_ex(zv, exception_name, exception_name_len + 1, name_maps);
-            Z_ADDREF_P(name_maps);
-            PANDA_ARRAY_DESTROY(name_maps);
+        if (zv != NULL) {
+            if (zend_hash_find(Z_ARRVAL_P(zv), exception_name, exception_name_len + 1, (void **)&name_maps_data) == SUCCESS) {
+                PANDA_INDEX_ARRAY_INC_NUM(*name_maps_data, code, PANDA_EXCEPTION_DEFAULE_CODE_COUNT);
+            } else {
+                zval *name_maps;
+                PANDA_ARRAY_INIT(name_maps);
+                add_index_long(name_maps, code, PANDA_EXCEPTION_DEFAULE_CODE_COUNT);
+                add_assoc_zval_ex(zv, exception_name, exception_name_len + 1, name_maps);
+                Z_ADDREF_P(name_maps);
+                PANDA_ARRAY_DESTROY(name_maps);
+            }
         }
         PANDA_G(exception_count)++;
     } while(0);
