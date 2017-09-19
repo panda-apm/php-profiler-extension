@@ -65,29 +65,30 @@ static void panda_error_execute(int type, const char *error_filename, const uint
     int error_name_len = PANDA_STRLEN(error_name);
 
     zval *error_statistics = PANDA_G(error_statistics);
-    if (zend_hash_exists(Z_ARRVAL_P(error_statistics), error_name, error_name_len)) {
-        PANDA_ASSOC_ARRAY_INC_NUM(error_statistics, error_name, PANDA_ERROR_DEFAULE_CODE_COUNT);
-    } else {
-        add_assoc_long(error_statistics, error_name,PANDA_ERROR_DEFAULE_CODE_COUNT);
-    }
-
-    if (error_handling == EH_NORMAL) {
-        if (type == E_ERROR || type == E_CORE_ERROR) {
-            va_list args_copy;
-            char* error_message;
-            va_copy(args_copy, args);
-            vspprintf(&error_message, 0, format, args_copy);
-            va_end(args_copy);
-
-            add_assoc_long(fatal_error, PANDA_NODE_ERROR_FATAL_ERROR_TYPE, type);
-            add_assoc_string(fatal_error, PANDA_NODE_ERROR_FATAL_ERROR_FILE, (char *)error_filename, 1);
-            add_assoc_long(fatal_error, PANDA_NODE_ERROR_FATAL_ERROR_LINE, error_lineno);
-            add_assoc_string(fatal_error, PANDA_NODE_ERROR_FATAL_ERROR_MESSAGE, error_message, 1);
-            efree(error_message);
+    if (error_statistics != NULL) {
+        if (zend_hash_exists(Z_ARRVAL_P(error_statistics), error_name, error_name_len)) {
+            PANDA_ASSOC_ARRAY_INC_NUM(error_statistics, error_name, PANDA_ERROR_DEFAULE_CODE_COUNT);
+        } else {
+            add_assoc_long(error_statistics, error_name,PANDA_ERROR_DEFAULE_CODE_COUNT);
         }
-    }
 
-    PANDA_G(error_count)++;
+        if (error_handling == EH_NORMAL) {
+            if (type == E_ERROR || type == E_CORE_ERROR) {
+                va_list args_copy;
+                char* error_message;
+                va_copy(args_copy, args);
+                vspprintf(&error_message, 0, format, args_copy);
+                va_end(args_copy);
+
+                add_assoc_long(fatal_error, PANDA_NODE_ERROR_FATAL_ERROR_TYPE, type);
+                add_assoc_string(fatal_error, PANDA_NODE_ERROR_FATAL_ERROR_FILE, (char *)error_filename, 1);
+                add_assoc_long(fatal_error, PANDA_NODE_ERROR_FATAL_ERROR_LINE, error_lineno);
+                add_assoc_string(fatal_error, PANDA_NODE_ERROR_FATAL_ERROR_MESSAGE, error_message, 1);
+                efree(error_message);
+            }
+        }
+        PANDA_G(error_count)++;
+    }
     _panda_error_execute(type, error_filename, error_lineno, format, args);
 }
 

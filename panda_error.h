@@ -6,7 +6,7 @@
 #define PANDA_NODE_ERROR "error"
 #define PANDA_NODE_ERROR_COUNT "count"
 #define PANDA_NODE_ERROR_STATISTICS "statistics"
-#define PANDA_NODE_ERROR_FATAL_ERROR "fatal_error"
+#define PANDA_NODE_ERROR_FATAL_ERROR "fatalError"
 #define PANDA_NODE_ERROR_FATAL_ERROR_TYPE "type"
 #define PANDA_NODE_ERROR_FATAL_ERROR_FILE "file"
 #define PANDA_NODE_ERROR_FATAL_ERROR_LINE "line"

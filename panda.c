@@ -108,17 +108,16 @@ PHP_MINIT_FUNCTION(panda)
                        sync_config(config TSRMLS_CC);
                     }
                     PANDA_G(is_registered) = 1;
+                    panda_stack_init_hooks(TSRMLS_C);
+                    panda_compile_init_hooks(TSRMLS_C);
+                    panda_error_init_hooks(TSRMLS_C);
+                    panda_exception_init_hooks(TSRMLS_C);
+                    panda_expend_init_globals(TSRMLS_C);
+                    panda_expend_init_hooks(TSRMLS_C);
                 }
             }
         }
 
-
-        panda_stack_init_hooks(TSRMLS_C);
-        panda_expend_init_globals(TSRMLS_C);
-        panda_expend_init_hooks(TSRMLS_C);
-        panda_compile_init_hooks(TSRMLS_C);
-        panda_error_init_hooks(TSRMLS_C);
-        panda_exception_init_hooks(TSRMLS_C);
 
         PANDA_ARRAY_DESTROY(client_config);
     }
@@ -131,17 +130,18 @@ PHP_MINIT_FUNCTION(panda)
 PHP_MSHUTDOWN_FUNCTION(panda)
 {
     if (panda_request_is_cli_mode(TSRMLS_C) == PANDA_FALSE) {
-        panda_stack_destroy_hooks(TSRMLS_C);
-        panda_expend_destroy_hooks(TSRMLS_C);
-        panda_expend_destroy_globals(TSRMLS_C);
-        panda_compile_destroy_hooks(TSRMLS_C);
-        panda_error_destroy_hooks(TSRMLS_C);
-        panda_exception_destroy_hooks(TSRMLS_C);
+        if (PANDA_G(is_registered)) {
+            panda_stack_destroy_hooks(TSRMLS_C);
+            panda_compile_destroy_hooks(TSRMLS_C);
+            panda_error_destroy_hooks(TSRMLS_C);
+            panda_exception_destroy_hooks(TSRMLS_C);
+            panda_expend_destroy_hooks(TSRMLS_C);
+            panda_expend_destroy_globals(TSRMLS_C);
+        }
 
-
-        if (PANDA_G(_config_hash)) {
-            efree(PANDA_G(_config_hash));
-            PANDA_G(_config_hash) = NULL;
+        if (PANDA_G(config_hash)) {
+            efree(PANDA_G(config_hash));
+            PANDA_G(config_hash) = NULL;
         }
     }
     UNREGISTER_INI_ENTRIES();

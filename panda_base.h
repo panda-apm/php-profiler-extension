@@ -2,8 +2,8 @@
 #define PHP_PANDA_BASE_H
 
 #define PANDA_NODE_BASE "base"
-#define PANDA_NODE_BASE_ID  "_id"
-#define PANDA_NODE_BASE_KEY "_key"
+#define PANDA_NODE_BASE_ID  "id"
+#define PANDA_NODE_BASE_KEY "key"
 #define PANDA_NODE_BASE_LANG "lang"
 #define PANDA_NODE_BASE_LANG_VERSION "version"
 #define PANDA_NODE_BASE_PROTOCOL "protocol"

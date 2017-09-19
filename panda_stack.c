@@ -136,7 +136,7 @@ int panda_stack_destroy_hooks(TSRMLS_C)
 
 int panda_stack_extract_entity_data(panda_stack_entity_t *entity, zend_execute_data *execute_data, zval *expend_data TSRMLS_DC)
 {
-    zval *zv = PANDA_G(stack_maps);
+    zval *statck_maps = PANDA_G(stack_maps);
     zval **stack;
 
     int status = FAILURE;
@@ -151,6 +151,10 @@ int panda_stack_extract_entity_data(panda_stack_entity_t *entity, zend_execute_d
     }
 
     do {
+        if (statck_maps == NULL) {
+           break;
+        }
+
         if (execute_data != NULL) {
             if (walltime_us < PANDA_G(config_limit_function_time_us)) {
                break;
@@ -165,7 +169,7 @@ int panda_stack_extract_entity_data(panda_stack_entity_t *entity, zend_execute_d
             }
         }
 
-        if (zend_hash_index_find(Z_ARRVAL_P(zv), (ulong)entity->id, (void **)&stack) == SUCCESS) {
+        if (zend_hash_index_find(Z_ARRVAL_P(statck_maps), (ulong)entity->id, (void **)&stack) == SUCCESS) {
             PANDA_ASSOC_ARRAY_INC_NUM(*stack, PANDA_NODE_STACK_MAPS_CALL_TIME, 1);
             PANDA_ASSOC_ARRAY_INC_NUM(*stack, PANDA_NODE_STACK_MAPS_WALL_TIME_US, walltime_us);
             PANDA_ASSOC_ARRAY_INC_NUM(*stack, PANDA_NODE_STACK_MAPS_CPU_TIME_US, cpu_time_us);
@@ -191,7 +195,7 @@ int panda_stack_extract_entity_data(panda_stack_entity_t *entity, zend_execute_d
                 Z_ADDREF_P(expend_data);
             }
 
-            add_index_zval(zv, entity->id, new_stack);
+            add_index_zval(statck_maps, entity->id, new_stack);
             Z_ADDREF_P(new_stack);
             PANDA_ARRAY_DESTROY(new_stack);
         }
