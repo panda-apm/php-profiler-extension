@@ -14,6 +14,13 @@ int panda_exception_compose_node(TSRMLS_D)
     zval *node_exceptions = PANDA_G(node_exception);
     add_assoc_long(node_exceptions, PANDA_NODE_EXCEPTION_COUNT, PANDA_G(exception_count));
     Z_ADDREF_P(PANDA_G(exception_statistics));
+
+    int count = zend_hash_num_elements(Z_ARRVAL_P(PANDA_G(exception_statistics)));
+    if (count == 0) {
+        convert_to_object(PANDA_G(exception_statistics));
+    }
+
+
     add_assoc_zval(node_exceptions, PANDA_NODE_EXCEPTION_STATISTICS, PANDA_G(exception_statistics));
     return SUCCESS;
 }
@@ -75,6 +82,7 @@ static void panda_exception_excecute(zval *exception TSRMLS_DC)
                 PANDA_ARRAY_INIT(name_maps);
                 add_index_long(name_maps, code, PANDA_EXCEPTION_DEFAULE_CODE_COUNT);
                 add_assoc_zval_ex(exception_statistics, exception_name, exception_name_len + 1, name_maps);
+                convert_to_object(name_maps);
                 Z_ADDREF_P(name_maps);
                 PANDA_ARRAY_DESTROY(name_maps);
             }

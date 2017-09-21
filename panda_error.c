@@ -29,8 +29,18 @@ int panda_error_compose_node(TSRMLS_D)
     zval *node_error = PANDA_G(node_error);
     add_assoc_long(node_error, PANDA_NODE_ERROR_COUNT, PANDA_G(error_count));
     Z_ADDREF_P(PANDA_G(error_statistics));
+    int error_statistics_count = zend_hash_num_elements(Z_ARRVAL_P(PANDA_G(error_statistics)));
+    if (error_statistics_count == 0) {
+        convert_to_object(PANDA_G(error_statistics));
+    }
+
     add_assoc_zval(node_error, PANDA_NODE_ERROR_STATISTICS, PANDA_G(error_statistics));
     Z_ADDREF_P(PANDA_G(error_fatal));
+    int error_fatal_count = zend_hash_num_elements(Z_ARRVAL_P(PANDA_G(error_fatal)));
+    if (error_fatal_count == 0) {
+        convert_to_object(PANDA_G(error_fatal));
+    }
+
     add_assoc_zval(node_error, PANDA_NODE_ERROR_FATAL_ERROR, PANDA_G(error_fatal));
     return SUCCESS;
 }

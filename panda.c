@@ -242,7 +242,7 @@ PHP_RSHUTDOWN_FUNCTION(panda)
         add_assoc_zval(data, PANDA_NODE_COMPILE, PANDA_G(node_compile));
         panda_compile_destroy_globals();
 
-        long options = PHP_JSON_FORCE_OBJECT;
+        long options = 0;
         smart_str buf_json = {0};
         php_json_encode(&buf_json, data, options TSRMLS_CC);
         smart_str_0(&buf_json);

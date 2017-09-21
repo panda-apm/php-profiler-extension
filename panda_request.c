@@ -75,13 +75,33 @@ int panda_request_compose_node(TSRMLS_D)
             add_assoc_long(server, PANDA_NODE_REQUEST_SERVER_IS_XML_REQUEST, (long)xml_request);
 
             if (PANDA_G(config_collect_request_cookie)) {
-                zval *cookie = PANDA_REQUEST_GET_PARAMS(PANDA_REQUEST_VARS_COOKIE);
-                add_assoc_zval(zv, PANDA_NODE_REQUEST_COOKIES, cookie);
+                zval *cookies = PANDA_REQUEST_GET_PARAMS(PANDA_REQUEST_VARS_COOKIE);
+                int count = zend_hash_num_elements(Z_ARRVAL_P(cookies));
+                if (count == 0) {
+                    zval *cookies_new;
+                    PANDA_ARRAY_INIT(cookies_new);
+                    convert_to_object(cookies_new);
+                    Z_ADDREF_P(cookies_new);
+                    add_assoc_zval(zv, PANDA_NODE_REQUEST_COOKIES, cookies_new);
+                    PANDA_ARRAY_DESTROY(cookies_new);
+                } else {
+                    add_assoc_zval(zv, PANDA_NODE_REQUEST_COOKIES, cookies);
+                }
             }
 
             if (PANDA_G(config_collect_request_post)) {
                 zval *posts = PANDA_REQUEST_GET_PARAMS(PANDA_REQUEST_VARS_POST);
-                add_assoc_zval(zv, PANDA_NODE_REQUEST_POSTS, posts);
+                int count = zend_hash_num_elements(Z_ARRVAL_P(posts));
+                if (count == 0) {
+                    zval *posts_new;
+                    PANDA_ARRAY_INIT(posts_new);
+                    convert_to_object(posts_new);
+                    Z_ADDREF_P(posts_new);
+                    add_assoc_zval(zv, PANDA_NODE_REQUEST_POSTS, posts_new);
+                    PANDA_ARRAY_DESTROY(posts_new);
+                } else {
+                    add_assoc_zval(zv, PANDA_NODE_REQUEST_POSTS, posts);
+                }
             }
         }
 

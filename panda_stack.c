@@ -50,7 +50,6 @@ int panda_stack_init_globals(TSRMLS_D)
     PANDA_G(stack_count) = 0;
     PANDA_G(stack_max_level) = 0;
     PANDA_G(stack_entity_id) = -1;
-
     return SUCCESS;
 }
 
@@ -103,7 +102,7 @@ int panda_stack_compose_node(TSRMLS_D)
 {
     zval *zv = PANDA_G(node_stack);
     zend_hash_sort(Z_ARRVAL_P(PANDA_G(stack_maps)), zend_qsort, panda_stack_array_compare, 0 TSRMLS_CC);
-
+    convert_to_object(PANDA_G(stack_maps));
     Z_ADDREF_P(PANDA_G(stack_maps));
     add_assoc_zval(zv, PANDA_NODE_STACK_MAPS, PANDA_G(stack_maps));
     add_assoc_long(zv, PANDA_NODE_STACK_COUNT, PANDA_G(stack_count));
@@ -191,11 +190,14 @@ int panda_stack_extract_entity_data(panda_stack_entity_t *entity, zend_execute_d
             add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_START_TIME_MS, entity->start_us / 1000);
             add_assoc_long(new_stack, PANDA_NODE_STACK_MAPS_END_TIME_MS, entity->end_us / 1000);
             if (expend_data) {
-                add_assoc_zval(new_stack, PANDA_NODE_STACK_MAPS_REFRENCES, expend_data);
-                Z_ADDREF_P(expend_data);
+                int expend_data_count = zend_hash_num_elements(Z_ARRVAL_P((expend_data)));
+                if (expend_data_count) {
+                    add_assoc_zval(new_stack, PANDA_NODE_STACK_MAPS_REFRENCES, expend_data);
+                    Z_ADDREF_P(expend_data);
+                }
             }
 
-            add_index_zval(statck_maps, entity->id, new_stack);
+            add_index_zval(statck_maps, (ulong)entity->id, new_stack);
             Z_ADDREF_P(new_stack);
             PANDA_ARRAY_DESTROY(new_stack);
         }

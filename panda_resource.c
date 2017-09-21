@@ -11,7 +11,13 @@ int panda_resource_compose_node(TSRMLS_D)
 {
     Z_ADDREF_P(PANDA_G(resources_maps));
     add_assoc_zval(PANDA_G(node_resource), PANDA_NODE_RESOURCE_MAPS, PANDA_G(resources_maps));
+
+
     Z_ADDREF_P(PANDA_G(resources_sqls));
+    int resources_sqls_count = zend_hash_num_elements(Z_ARRVAL_P(PANDA_G(resources_sqls)));
+    if (resources_sqls_count == 0 ) {
+        convert_to_object(PANDA_G(resources_sqls));
+    }
     add_assoc_zval(PANDA_G(node_resource), PANDA_NODE_RESOURCE_SQLS, PANDA_G(resources_sqls));
     return SUCCESS;
 }
@@ -84,6 +90,7 @@ int panda_resource_get_resource_last_insert_id(const char *type, int *resource_i
 int panda_resource_get_resource_id_with_hashkey(ulong hash, int *resource_id TSRMLS_DC)
 {
     HashTable *ht = &PANDA_G(resource_index_hashkey_resources_table);
+
     int status = FAILURE;
     do {
         int *data;
