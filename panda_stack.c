@@ -70,31 +70,43 @@ int panda_stack_end_profiling(TSRMLS_D)
 {
     PANDA_STACK_END_PROFILING(&PANDA_G(stack_entries), NULL, NULL);
 
-    int main_walltime_ms =  panda_stack_walltime_ms(TSRMLS_C);
-    if (main_walltime_ms < PANDA_G(config_limit_time_ms)) {
-        php_splice(Z_ARRVAL_P(PANDA_G(node_stack)), 0, 1, NULL, (zend_uint)NULL, NULL TSRMLS_CC);
-        panda_stack_set_slowly_flag(PANDA_FALSE, PANDA_G(config_limit_time_ms) TSRMLS_CC);
-    } else {
-        panda_stack_set_slowly_flag(PANDA_TRUE, PANDA_G(config_limit_time_ms) TSRMLS_CC);
+    zval **data;
+    int64 main_walltime, main_walltime_ms;
+    zval* main_stack =  panda_stack_get_main(TSRMLS_C);
+
+    if (main_stack) {
+        if (zend_hash_find(Z_ARRVAL_P(main_stack), PANDA_NODE_STACK_MAPS_WALL_TIME_US,
+                PANDA_STRLEN(PANDA_NODE_STACK_MAPS_WALL_TIME_US), (void **)&data) == SUCCESS) {
+            main_walltime = Z_LVAL_PP(data);
+            main_walltime_ms = main_walltime / 1000;
+        }
+
+        if (main_walltime_ms < PANDA_G(config_limit_time_ms)) {
+            zval *new_stack_maps;
+            PANDA_ARRAY_INIT_SIZE(new_stack_maps, 1);
+            Z_ADDREF_P(main_stack);
+            add_next_index_zval(new_stack_maps, main_stack);
+            PANDA_ARRAY_DESTROY(PANDA_G(stack_maps));
+            PANDA_G(stack_maps) = new_stack_maps;
+            panda_stack_set_slowly_flag(PANDA_FALSE, PANDA_G(config_limit_time_ms) TSRMLS_CC);
+        } else {
+            panda_stack_set_slowly_flag(PANDA_TRUE, PANDA_G(config_limit_time_ms) TSRMLS_CC);
+        }
     }
 
     return SUCCESS;
 }
 
 
-int panda_stack_walltime_ms(TSRMLS_D)
+zval* panda_stack_get_main(TSRMLS_D)
 {
-    zval **entity;
-    int *data;
+    zval **entity, *data = NULL;
     int64 walltime, walltime_ms;
     if (zend_hash_index_find(Z_ARRVAL_P(PANDA_G(stack_maps)), 0, (void **)&entity) == SUCCESS) {
-        if (zend_hash_find(Z_ARRVAL_PP(entity), PANDA_NODE_STACK_MAPS_WALL_TIME_US,
-                PANDA_STRLEN(PANDA_NODE_STACK_MAPS_WALL_TIME_US), (void **)&data)) {
-            walltime = *data;
-        }
+        data = *entity;
     }
-    walltime_ms = walltime / 1000;
-    return walltime_ms;
+
+    return data;
 }
 
 

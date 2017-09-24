@@ -60,6 +60,7 @@ extern zend_module_entry panda_module_entry;
 #define PANDA_HASHTABLE_INDEX_ADD(ht, lval, func_type, func_size) zend_hash_index_update(ht, lval, func_type, func_size, NULL)
 #define PANDA_HASHTABLE_DESTROY(ht) zend_hash_destroy(ht)
 #define PANDA_ARRAY_INIT(val) MAKE_STD_ZVAL(val);array_init(val)
+#define PANDA_ARRAY_INIT_SIZE(val, size)  MAKE_STD_ZVAL(val);array_init_size(val, size)
 #define PANDA_ARRAY_DESTROY(val) zval_ptr_dtor(&val)
 #define PANDA_ARRAY_PRINT(val)  zend_print_zval_r(val, 0 TSRMLS_CC)
 #define PANDA_ARRAY_COUNT(val) zend_hash_num_elements(Z_ARRVAL_P(val))
@@ -90,6 +91,7 @@ extern zend_module_entry panda_module_entry;
 #define PANDA_TRAN_COMMAND_REGISTER_MAX_BUF_LEN 46
 #define PANDA_TRAN_COMMAND_REGISTER_MAX_RES_BUF_LEN 512
 
+#define PANDA_LISENCE_KEY_LEN 36
 
 #define PANDA_LOG(message)                                                                         \
     do {                                                                                           \

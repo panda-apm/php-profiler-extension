@@ -114,7 +114,7 @@ int panda_stack_init_hooks(TSRMLS_D);
 int panda_stack_destroy_hooks(TSRMLS_D);
 int panda_stack_begin_profiling(TSRMLS_D);
 int panda_stack_end_profiling(TSRMLS_D);
-int panda_stack_walltime_ms(TSRMLS_D);
+zval* panda_stack_get_main(TSRMLS_D);
 uint64 panda_stack_cycle_timer(TSRMLS_D);
 int panda_stack_free_entity(panda_stack_entity_t *entity TSRMLS_DC);
 void **panda_stack_get_execute_parameters(zend_execute_data *execute_data TSRMLS_DC);

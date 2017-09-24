@@ -95,25 +95,28 @@ PHP_MINIT_FUNCTION(panda)
     if (panda_request_is_cli_mode(TSRMLS_C) == PANDA_FALSE) {
         zval *client_config;
         PANDA_ARRAY_INIT(client_config);
-        if (PANDA_G(config_key) && remote_is_registered(PANDA_G(config_key), client_config TSRMLS_CC) == SUCCESS) {
-            zval **status = NULL;
-            zval **message = NULL;
 
-            if (zend_hash_find(Z_ARRVAL_P(client_config), PANDA_TRAN_COMMAND_RESP_STATUS,
-                    PANDA_STRLEN(PANDA_TRAN_COMMAND_RESP_STATUS), (void **)&status) == SUCCESS) {
-                if (Z_TYPE_PP(status) == IS_BOOL && Z_BVAL_PP(status)) {
-                    if (zend_hash_find(Z_ARRVAL_P(client_config), PANDA_TRAN_COMMAND_RESP_MESSAGE,
-                            PANDA_STRLEN(PANDA_TRAN_COMMAND_RESP_MESSAGE), (void **)&message) == SUCCESS) {
-                        zval *config = *message;
-                       sync_config(config TSRMLS_CC);
+        if (PANDA_G(config_key) && PANDA_STRLEN(PANDA_G(config_key)) != PANDA_LISENCE_KEY_LEN) {
+            if (remote_is_registered(PANDA_G(config_key), client_config TSRMLS_CC) == SUCCESS) {
+                zval **status = NULL;
+                zval **message = NULL;
+
+                if (zend_hash_find(Z_ARRVAL_P(client_config), PANDA_TRAN_COMMAND_RESP_STATUS,
+                        PANDA_STRLEN(PANDA_TRAN_COMMAND_RESP_STATUS), (void **)&status) == SUCCESS) {
+                    if (Z_TYPE_PP(status) == IS_BOOL && Z_BVAL_PP(status)) {
+                        if (zend_hash_find(Z_ARRVAL_P(client_config), PANDA_TRAN_COMMAND_RESP_MESSAGE,
+                                PANDA_STRLEN(PANDA_TRAN_COMMAND_RESP_MESSAGE), (void **)&message) == SUCCESS) {
+                            zval *config = *message;
+                           sync_config(config TSRMLS_CC);
+                        }
+                        PANDA_G(is_registered) = 1;
+                        panda_stack_init_hooks(TSRMLS_C);
+                        panda_compile_init_hooks(TSRMLS_C);
+                        panda_error_init_hooks(TSRMLS_C);
+                        panda_exception_init_hooks(TSRMLS_C);
+                        panda_expend_init_globals(TSRMLS_C);
+                        panda_expend_init_hooks(TSRMLS_C);
                     }
-                    PANDA_G(is_registered) = 1;
-                    panda_stack_init_hooks(TSRMLS_C);
-                    panda_compile_init_hooks(TSRMLS_C);
-                    panda_error_init_hooks(TSRMLS_C);
-                    panda_exception_init_hooks(TSRMLS_C);
-                    panda_expend_init_globals(TSRMLS_C);
-                    panda_expend_init_hooks(TSRMLS_C);
                 }
             }
         }
