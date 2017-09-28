@@ -23,8 +23,9 @@
 #define PANDA_NODE_STACK_MAPS_MEMORY_PEAK_USAGE "pmu"
 #define PANDA_NODE_STACK_MAPS_CALL_TIME "ct"
 #define PANDA_NODE_STACK_MAPS_CPU_TIME_US "c"
-#define PANDA_NODE_STACK_MAPS_SLOWLY "s"
-#define PANDA_NODE_STACK_MAPS_SLOWLY_REFRENCE_VALUE "srv"
+#define PANDA_NODE_STACK_MAPS_FLAG_SLOWLY "s"
+#define PANDA_NODE_STACL_MAPS_FLAG_FATAL_ERROR "fe"
+#define PANDA_NODE_STACK_MAPS_FLAG_SLOWLY_REFRENCE_VALUE "srv"
 #define PANDA_NODE_STACK_MAPS_LEVEL "l"
 #define PANDA_NODE_STACK_MAPS_REFRENCES "refs"
 
@@ -113,7 +114,7 @@ int panda_stack_compose_node(TSRMLS_D);
 int panda_stack_init_hooks(TSRMLS_D);
 int panda_stack_destroy_hooks(TSRMLS_D);
 int panda_stack_begin_profiling(TSRMLS_D);
-int panda_stack_end_profiling(TSRMLS_D);
+int panda_stack_end_profiling(int has_fatal_error TSRMLS_DC);
 zval* panda_stack_get_main(TSRMLS_D);
 uint64 panda_stack_cycle_timer(TSRMLS_D);
 int panda_stack_free_entity(panda_stack_entity_t *entity TSRMLS_DC);
@@ -127,5 +128,6 @@ char *panda_stack_get_function_name(zend_execute_data *execute_data TSRMLS_DC);
 static inline int panda_stcak_inc_entity_item_num(zval *zv, char* name, int64 num TSRMLS_DC);
 static inline long panda_stack_get_us_interval(struct timeval *start, struct timeval *end TSRMLS_DC);
 static int panda_stack_array_compare(const void *a, const void *b TSRMLS_DC);
-static inline void panda_stack_set_slowly_flag(int flag, int refrence_value TSRMLS_DC);
+static inline void panda_stack_set_slowly_flag(zval *entity, int flag, int refrence_value TSRMLS_DC);
+static inline void panda_stack_set_fatal_error_flag(zval *entity, int flag TSRMLS_DC);
 #endif

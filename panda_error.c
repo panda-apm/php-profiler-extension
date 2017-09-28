@@ -16,6 +16,7 @@ int panda_error_init_globals(TSRMLS_D)
     PANDA_ARRAY_INIT(PANDA_G(error_fatal));
     return SUCCESS;
 }
+
 int panda_error_destroy_globals(TSRMLS_D)
 {
     PANDA_ARRAY_DESTROY(PANDA_G(node_error));
@@ -43,6 +44,22 @@ int panda_error_compose_node(TSRMLS_D)
 
     add_assoc_zval(node_error, PANDA_NODE_ERROR_FATAL_ERROR, PANDA_G(error_fatal));
     return SUCCESS;
+}
+
+int panda_error_has_fatal_error(TSRMLS_D)
+{
+    int status = FAILURE;
+    do {
+        if (Z_TYPE_P(PANDA_G(error_fatal)) !=  IS_ARRAY) {
+            break;
+        }
+        int error_fatal_count = zend_hash_num_elements(Z_ARRVAL_P(PANDA_G(error_fatal)));
+        if (error_fatal_count > 0) {
+            status = SUCCESS;
+        }
+    } while(0);
+
+    return status;
 }
 
 int panda_error_init_hooks(TSRMLS_D)
@@ -83,7 +100,7 @@ static void panda_error_execute(int type, const char *error_filename, const uint
         }
 
         if (error_handling == EH_NORMAL) {
-            if (type == E_ERROR || type == E_CORE_ERROR) {
+            if (type == E_ERROR || type == E_USER_ERROR || type == E_CORE_ERROR) {
                 va_list args_copy;
                 char* error_message;
                 va_copy(args_copy, args);

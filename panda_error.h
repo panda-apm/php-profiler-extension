@@ -20,6 +20,7 @@ static void panda_error_execute(int type, const char *error_filename, const uint
 int panda_error_init_globals(TSRMLS_D);
 int panda_error_destroy_globals(TSRMLS_D);
 int panda_error_compose_node(TSRMLS_D);
+int panda_error_has_fatal_error(TSRMLS_D);
 int panda_error_init_hooks(TSRMLS_D);
 int panda_error_destroy_hooks(TSRMLS_D);
 static char* panda_error_transfer_error_name(int e_type TSRMLS_DC);

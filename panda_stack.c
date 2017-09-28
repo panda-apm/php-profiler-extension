@@ -66,7 +66,7 @@ int panda_stack_begin_profiling(TSRMLS_D)
     return SUCCESS;
 }
 
-int panda_stack_end_profiling(TSRMLS_D)
+int panda_stack_end_profiling(int has_fatal_error TSRMLS_DC)
 {
     PANDA_STACK_END_PROFILING(&PANDA_G(stack_entries), NULL, NULL);
 
@@ -81,16 +81,24 @@ int panda_stack_end_profiling(TSRMLS_D)
             main_walltime_ms = main_walltime / 1000;
         }
 
-        if (main_walltime_ms < PANDA_G(config_limit_time_ms)) {
-            zval *new_stack_maps;
-            PANDA_ARRAY_INIT_SIZE(new_stack_maps, 1);
-            Z_ADDREF_P(main_stack);
-            add_next_index_zval(new_stack_maps, main_stack);
-            PANDA_ARRAY_DESTROY(PANDA_G(stack_maps));
-            PANDA_G(stack_maps) = new_stack_maps;
-            panda_stack_set_slowly_flag(PANDA_FALSE, PANDA_G(config_limit_time_ms) TSRMLS_CC);
+        if (has_fatal_error == SUCCESS) {
+            panda_stack_set_fatal_error_flag(main_stack, PANDA_TRUE TSRMLS_CC);
         } else {
-            panda_stack_set_slowly_flag(PANDA_TRUE, PANDA_G(config_limit_time_ms) TSRMLS_CC);
+            panda_stack_set_fatal_error_flag(main_stack, PANDA_FALSE TSRMLS_CC);
+        }
+
+        if (main_walltime_ms < PANDA_G(config_limit_time_ms)) {
+            if (has_fatal_error == FAILURE) {
+                zval *new_stack_maps;
+                PANDA_ARRAY_INIT_SIZE(new_stack_maps, 1);
+                Z_ADDREF_P(main_stack);
+                add_next_index_zval(new_stack_maps, main_stack);
+                PANDA_ARRAY_DESTROY(PANDA_G(stack_maps));
+                PANDA_G(stack_maps) = new_stack_maps;
+            }
+            panda_stack_set_slowly_flag(main_stack, PANDA_FALSE, PANDA_G(config_limit_time_ms) TSRMLS_CC);
+        } else {
+            panda_stack_set_slowly_flag(main_stack, PANDA_TRUE, PANDA_G(config_limit_time_ms) TSRMLS_CC);
         }
     }
 
@@ -330,15 +338,16 @@ static inline long panda_stack_get_us_interval(struct timeval *start, struct tim
     return (((end->tv_sec - start->tv_sec) * 1000000) + (end->tv_usec - start->tv_usec));
 }
 
-static inline void panda_stack_set_slowly_flag(int flag, int refrence_value TSRMLS_DC)
+static inline void panda_stack_set_slowly_flag(zval* entity, int flag, int refrence_value TSRMLS_DC)
 {
-    zval **entity;
-    if (zend_hash_index_find(Z_ARRVAL_P(PANDA_G(stack_maps)), 0, (void **)&entity) == SUCCESS) {
-        add_assoc_long(*entity, PANDA_NODE_STACK_MAPS_SLOWLY, flag);
-        add_assoc_long(*entity, PANDA_NODE_STACK_MAPS_SLOWLY_REFRENCE_VALUE, refrence_value);
-    }
+    add_assoc_long(entity, PANDA_NODE_STACK_MAPS_FLAG_SLOWLY, flag);
+    add_assoc_long(entity, PANDA_NODE_STACK_MAPS_FLAG_SLOWLY_REFRENCE_VALUE, refrence_value);
 }
 
+static inline void panda_stack_set_fatal_error_flag(zval *entity, int flag TSRMLS_DC)
+{
+    add_assoc_long(entity, PANDA_NODE_STACL_MAPS_FLAG_FATAL_ERROR, flag);
+}
 
 static int panda_stack_array_compare(const void *a, const void *b TSRMLS_DC)
 {

@@ -199,7 +199,8 @@ PHP_RINIT_FUNCTION(panda)
 PHP_RSHUTDOWN_FUNCTION(panda)
 {
     if (PANDA_G(is_registered)) {
-        panda_stack_end_profiling(TSRMLS_C);
+        int has_fatal_error = panda_error_has_fatal_error(TSRMLS_C);
+        panda_stack_end_profiling(has_fatal_error TSRMLS_CC);
 
         zval *data;
         PANDA_ARRAY_INIT(data);
